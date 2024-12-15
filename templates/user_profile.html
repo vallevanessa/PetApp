@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ user.username }}'s Profile</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <header class="app-header">
+        <h1>{{ user.username }}'s Profile</h1>
+    </header>
+
+    <div class="profile-container">
+        <!-- User Details -->
+        <div class="user-details">
+            <img src="{{ user.profile_picture or url_for('static', filename='assets/default-profile-pic.png') }}" 
+                 alt="Profile Picture" class="profile-pic">
+            <h2>{{ user.username }}</h2>
+            <p><strong>Pet Name:</strong> {{ user.pet_name or 'N/A' }}</p>
+            <p><strong>Pet Breed:</strong> {{ user.pet_breed or 'N/A' }}</p>
+        </div>
+
+        <!-- User Posts -->
+        <section class="user-posts">
+            <h3>{{ user.username }}'s Posts</h3>
+            {% if user.posts %}
+                {% for post in user.posts %}
+                    <div class="post">
+                        <!-- Correcting image path dynamically -->
+                        <img src="{{ url_for('static', filename=post[2].lstrip('static/')) }}" 
+                             alt="Post Image" style="max-width: 100%; height: auto;">
+                        <p>{{ post[1] }}</p>
+                        <small>Posted on: {{ post[3] }}</small>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <p>No posts yet.</p>
+            {% endif %}
+        </section>
+    </div>
+
+    <!-- Bottom Navigation -->
+    <nav class="bottom-nav">
+        <a href="{{ url_for('home') }}" class="nav-item">
+            <img src="{{ url_for('static', filename='assets/home-icon.png') }}" alt="Home" />
+            <span>Home</span>
+        </a>
+        <a href="{{ url_for('search') }}" class="nav-item">
+            <img src="{{ url_for('static', filename='assets/search-icon.png') }}" alt="Search" />
+            <span>Search</span>
+        </a>
+        <a href="{{ url_for('map_view') }}" class="nav-item">
+            <img src="{{ url_for('static', filename='assets/map-icon.png') }}" alt="Map" />
+            <span>Map</span>
+        </a>
+        <a href="{{ url_for('profile') }}" class="nav-item">
+            <img src="{{ url_for('static', filename='assets/profile-icon.png') }}" alt="Profile" />
+            <span>Profile</span>
+        </a>
+    </nav>
+</body>
+</html>

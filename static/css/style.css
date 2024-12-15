@@ -81,6 +81,28 @@ section {
   color: #333; /* Darker text for username */
 }
 
+/* Style for clickable usernames */
+.username-link {
+  color: #007BFF; /* Blue color to indicate links */
+  text-decoration: none; /* Remove underline */
+  font-weight: bold; /* Make the text bold */
+}
+
+.username-link:hover {
+  text-decoration: underline; /* Add underline on hover */
+  color: #0056b3; /* Darker blue for hover effect */
+}
+
+.username-link:active {
+  color: #003f7f; /* Even darker blue for active state */
+}
+
+.username-link:focus {
+  outline: 2px solid #007BFF; /* Blue outline for focus state */
+  outline-offset: 2px;
+}
+
+/* Comment Styling */
 .post p {
   margin: 10px 0;
   font-size: 16px;
@@ -94,25 +116,35 @@ section {
   color: #aaa; /* Light gray for timestamps */
 }
 
+.post .comments p strong {
+  color: #007BFF; /* Match clickable username styling */
+}
+
 /* Like and Comment Styling */
 .post .like-button {
   margin: 10px 0;
   padding: 5px 10px;
-  background-color: #e0e0e0;
+  background-color: #f0f0f0; /* Slightly lighter gray */
   border: none;
   border-radius: 5px;
   font-size: 14px;
   color: #333;
   cursor: pointer;
-  transition: background-color 0.3s;
+  transition: background-color 0.2s ease, transform 0.1s ease; /* Smooth interactions */
 }
 
 .post .like-button:hover {
-  background-color: #d6d6d6;
+  background-color: #d9d9d9; /* Slightly darker on hover */
 }
 
 .post .like-button:active {
-  background-color: #c0c0c0;
+  background-color: #bfbfbf;
+  transform: scale(0.97); /* Add slight shrink effect for click feedback */
+}
+
+.post .like-button:focus {
+  outline: 2px solid #007BFF; /* Focus state for accessibility */
+  outline-offset: 2px;
 }
 
 .post .comments {
@@ -131,6 +163,7 @@ section {
   color: #444;
 }
 
+/* Comment Form Styling */
 .comment-form {
   display: flex;
   flex-direction: column;
@@ -201,7 +234,7 @@ section {
   color: #388E3C;
 }
 
-
+/* Filter Buttons Styling */
 #filter-buttons {
   position: absolute;
   top: 20px;
@@ -209,7 +242,7 @@ section {
   transform: translateX(-50%);
   display: flex;
   gap: 15px;
-  z-index: 1000; 
+  z-index: 1000;
 }
 
 .filter-button {
@@ -225,5 +258,49 @@ section {
 
 .filter-button:hover {
   background-color: #0056b3;
+}
+
+.filter-button:focus {
+  outline: 2px solid #007BFF; /* Focus state for accessibility */
+  outline-offset: 2px;
+}
+
+/* Profile Page Styling */
+.profile-container {
+  max-width: 800px;
+  margin: 20px auto;
+  padding: 20px;
+  background-color: #fff;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.user-details {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.profile-pic {
+  width: 150px;
+  height: 150px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #4CAF50;
+}
+
+.user-posts .post {
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  margin-bottom: 15px;
+  padding: 10px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.user-posts img {
+  width: 100%;
+  height: auto;
+  border-radius: 5px;
+  margin-bottom: 10px;
 }
 

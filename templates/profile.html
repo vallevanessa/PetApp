@@ -7,73 +7,89 @@
   <link rel="stylesheet" href="{{ url_for('static', filename='css/profile-style.css') }}">
 </head>
 <body>
-
   <div class="profile-container">
+    <div class="profile-header">
+      <div class="profile-picture">
+        <img src="{{ url_for('static', filename=profile_picture) }}" alt="Profile Picture" id="profile-pic">
 
-    <div class="profile-picture">
-      <img src="{{ url_for('static', filename='assets/default-profile-pic.png') }}" alt="Profile Picture" id="profile-pic">
-      <button onclick="showImageSelection()">Change Profile Picture</button>
-    </div>
+        <button id="change-profile-pic-btn" onclick="document.getElementById('profile-pic-input').click()">Change Profile Picture</button>
 
-    <div class="user-info">
-      <h2>Username: JohnDoe</h2>
-      <p>Followers: 250</p>
-      <p>Following: 180</p>
-      <p>Badges: 3</p>
-      <p>Pet Info: Fluffy (Golden Retriever)</p>
-    </div>
+        <input type="file" name="profile_picture" id="profile-pic-input" accept="image/*" onchange="updateProfilePic()" style="display: none;">
 
-    <div id="image-selection-modal" class="modal" style="display: none;">
-      <div class="modal-content">
-        <span class="close" onclick="closeImageSelection()">&times;</span>
-        <h3>Select a New Profile Picture</h3>
-        <div class="image-options">
-          <img src="{{ url_for('static', filename='assets/cat-profile.png') }}" alt="Profile 1" onclick="selectProfilePicture('cat-profile.png')">
-          <img src="{{ url_for('static', filename='assets/pig-profile.png') }}" alt="Profile 2" onclick="selectProfilePicture('pig-profile.png')">
-          <img src="{{ url_for('static', filename='assets/pug-profile.png') }}" alt="Profile 3" onclick="selectProfilePicture('pug-profile.png')">
-          <img src="{{ url_for('static', filename='assets/rabbit-profile.png') }}" alt="Profile 3" onclick="selectProfilePicture('rabbit-profile.png')">
-        </div>
+        <button id="save-btn" onclick="saveProfilePic()" style="display: none;">Save</button>
+      </div>
+      <div class="user-info">
+        <h2>Username: {{ username }}</h2>
+        <p>Followers: {{ followers }}</p>
+        <p>Following: {{ following }}</p>
+        <p>Badges: {{ badges }}</p>
+        <p>Pet Info: {{ pet_name }} ({{ pet_breed }})</p>
       </div>
     </div>
 
+    <div class="logout-button">
+      <button onclick="window.location.href='{{ url_for('logout') }}'">Logout</button>
+    </div>
   </div>
 
-
   <nav class="bottom-nav">
-    <a href="{{ url_for('home') }}" class="nav-item">
+    {% set active_page = 'profile' %}
+    <a href="{{ url_for('home') }}" class="nav-item {% if active_page == 'home' %}active{% endif %}">
       <img src="{{ url_for('static', filename='assets/home-icon.png') }}" alt="Home" />
       <span>Home</span>
     </a>
-    <a href="{{ url_for('search') }}" class="nav-item">
+    <a href="{{ url_for('search') }}" class="nav-item {% if active_page == 'search' %}active{% endif %}">
       <img src="{{ url_for('static', filename='assets/search-icon.png') }}" alt="Search" />
       <span>Search</span>
     </a>
-    <a href="{{ url_for('map_view') }}" class="nav-item">
+    <a href="{{ url_for('map_view') }}" class="nav-item {% if active_page == 'map' %}active{% endif %}">
       <img src="{{ url_for('static', filename='assets/map-icon.png') }}" alt="Map" />
       <span>Map</span>
     </a>
-    <a href="#" class="nav-item">
+    <a href="{{ url_for('profile') }}" class="nav-item {% if active_page == 'profile' %}active{% endif %}">
       <img src="{{ url_for('static', filename='assets/profile-icon.png') }}" alt="Profile" />
       <span>Profile</span>
     </a>
   </nav>
 
   <script>
-    function showImageSelection() {
 
-      document.getElementById("image-selection-modal").style.display = "block";
+    function updateProfilePic() {
+      var fileInput = document.getElementById("profile-pic-input");
+      var file = fileInput.files[0];
+      var reader = new FileReader();
+
+      reader.onloadend = function () {
+        var profilePic = document.getElementById("profile-pic");
+        profilePic.src = reader.result; 
+        document.getElementById("save-btn").style.display = 'block'; 
+      }
+
+      if (file) {
+        reader.readAsDataURL(file);  
+      }
     }
 
-    function closeImageSelection() {
+    function saveProfilePic() {
+      var formData = new FormData();
+      var fileInput = document.getElementById("profile-pic-input");
+      formData.append('profile_picture', fileInput.files[0]);
 
-      document.getElementById("image-selection-modal").style.display = "none";
-    }
+      fetch('{{ url_for("update_profile_picture") }}', {
+        method: 'POST',
+        body: formData,
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          alert('Profile picture updated!');
+        } else {
+          alert('Failed to update profile picture.');
+        }
+      });
 
-    function selectProfilePicture(imageName) {
-      document.getElementById("profile-pic").src = "{{ url_for('static', filename='assets/') }}" + imageName;
-      closeImageSelection();  
+      document.getElementById("save-btn").style.display = 'none';
     }
   </script>
-
 </body>
 </html>

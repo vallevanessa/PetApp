@@ -17,6 +17,7 @@
     <p>Loading posts...</p>
 </div>
 
+<!-- Bottom Navigation -->
 <nav class="bottom-nav">
     <a href="{{ url_for('home') }}" class="nav-item">
         <img src="{{ url_for('static', filename='assets/home-icon.png') }}" alt="Home" />
@@ -45,18 +46,21 @@
               const feed = document.getElementById('feed');
               feed.innerHTML = ''; // Clear "Loading" message
 
-              // Loop through posts and display them
               posts.forEach(post => {
                   const postElement = document.createElement('div');
                   postElement.classList.add('post');
 
                   postElement.innerHTML = `
-                      <h3>${post.username}</h3>
+                      <h3>
+                          <a href="/user_profile/${post.user_id}" class="username-link">${post.username}</a>
+                      </h3>
                       <img src="${post.image_url}" alt="Post Image">
                       <p>${post.content}</p>
                       <small>Posted on: ${new Date(post.created_at).toLocaleString()}</small>
                       <p id="like-count-${post.post_id}">${post.like_count} likes</p>
-                      <button class="like-button" data-post-id="${post.post_id}" data-liked="${post.user_liked}">${post.user_liked ? '💔 Unlike' : '❤️ Like'}</button>
+                      <button class="like-button" data-post-id="${post.post_id}" data-liked="${post.user_liked}">
+                          ${post.user_liked ? '💔 Unlike' : '❤️ Like'}
+                      </button>
                       <form class="comment-form" data-post-id="${post.post_id}">
                           <textarea name="content" placeholder="Write a comment..." required></textarea>
                           <button type="submit">Comment</button>
@@ -67,18 +71,16 @@
                   `;
                   feed.appendChild(postElement);
 
-                  // Load comments for the post
-                  loadComments(post.post_id);
+                  loadComments(post.post_id); // Load comments
               });
           })
           .catch(error => {
               console.error('Error fetching posts:', error);
-              const feed = document.getElementById('feed');
-              feed.innerHTML = '<p>Failed to load posts.</p>';
+              document.getElementById('feed').innerHTML = '<p>Failed to load posts. Please try again later.</p>';
           });
   }
-  //will this add a change so i can push to github :/
-  // Function to load comments for a specific post
+
+  // Load comments for a specific post
   function loadComments(postId) {
       fetch(`/fetch_comments?post_id=${postId}`)
           .then(response => response.json())
@@ -89,27 +91,29 @@
                   return;
               }
 
-              commentsDiv.innerHTML = ''; // Clear the "Loading comments..." text
+              commentsDiv.innerHTML = ''; // Clear "Loading" text
               comments.forEach(comment => {
                   const commentElement = document.createElement('p');
-                  commentElement.innerHTML = `<strong>${comment.username}</strong>: ${comment.content}`;
+                  commentElement.innerHTML = `
+                      <strong>
+                          <a href="/user_profile/${comment.user_id}" class="username-link">${comment.username}</a>
+                      </strong>: ${comment.content}
+                  `;
                   commentsDiv.appendChild(commentElement);
               });
           })
           .catch(error => {
               console.error('Error fetching comments:', error);
-              const commentsDiv = document.getElementById(`comments-${postId}`);
-              commentsDiv.innerHTML = '<p>Failed to load comments.</p>';
+              document.getElementById(`comments-${postId}`).innerHTML = '<p>Failed to load comments.</p>';
           });
   }
 
-  // Listen for like button clicks
+  // Like/Unlike post functionality
   document.addEventListener('click', function (event) {
       if (event.target.matches('.like-button')) {
           const button = event.target;
           const postId = button.getAttribute('data-post-id');
           const liked = button.getAttribute('data-liked') === 'true';
-          const userId = 1; // Replace with dynamic user_id when available
 
           fetch('/like_post', {
               method: 'POST',
@@ -117,8 +121,7 @@
                   'Content-Type': 'application/x-www-form-urlencoded',
               },
               body: new URLSearchParams({
-                  post_id: postId,
-                  user_id: userId,
+                  post_id: postId
               }),
           })
           .then(response => response.json())
@@ -135,26 +138,20 @@
               }
           })
           .catch(error => {
-              console.error('Error liking post:', error);
+              console.error('Error liking/unliking post:', error);
           });
       }
   });
 
-  // Listen for comment form submissions
+  // Handle comment submission
   document.addEventListener('submit', function (event) {
       if (event.target.matches('.comment-form')) {
-          event.preventDefault(); // Prevent the default form submission
+          event.preventDefault();
 
           const form = event.target;
-          const postId = form.getAttribute('data-post-id'); // Get post_id from the form's data attribute
+          const postId = form.getAttribute('data-post-id');
           const content = form.querySelector('textarea[name="content"]').value;
 
-          if (!postId) {
-              console.error('Error: post_id is missing.');
-              return;
-          }
-
-          // Send the comment to the backend
           fetch('/add_comment', {
               method: 'POST',
               headers: {
@@ -162,22 +159,13 @@
               },
               body: new URLSearchParams({
                   post_id: postId,
-                  user_id: 1, // Hardcoding user_id for now, replace with dynamic user_id if available
-                  content: content,
+                  content: content
               }),
           })
-          .then(response => {
-              if (!response.ok) {
-                  throw new Error('Failed to add comment');
-              }
-              return response.json();
-          })
-          .then(data => {
-              console.log('Comment added:', data);
-              // Reload comments for the post
-              loadComments(postId);
-              form.reset(); // Clear the comment form
-
+          .then(response => response.json())
+          .then(() => {
+              loadComments(postId); // Reload comments
+              form.reset();
           })
           .catch(error => {
               console.error('Error adding comment:', error);
@@ -185,7 +173,7 @@
       }
   });
 
-  // Fetch posts when the page loads
+  // Fetch posts on page load
   fetchPosts();
 </script>
 

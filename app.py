@@ -102,7 +102,58 @@ def login_required(f):
 def profile():
     user_id = session['user_id']
     # Fetch user data from the database...
-    return render_template('profile.html')
+    try:
+        db_connection = sqlite3.connect('data/database.db')
+        cursor = db_connection.cursor()
+
+        cursor.execute('SELECT username, pet_name, pet_breed, profile_picture FROM Users WHERE user_id = ?', (user_id,))
+        user_data = cursor.fetchone()
+
+        print("fetched user data: ", user_data)
+
+        if not user_data:
+            flash("User not found")
+            return redirect(url_for('home'))
+        
+        username, pet_name, pet_breed, profile_picture = user_data
+
+        if not profile_picture:
+            profile_picture = '/assets/default-profile-pic.png'
+            print("No profile picture found, using default: ", profile_picture)
+        db_connection.close()
+
+        print("Profile picture URL:", url_for('static', filename=profile_picture))
+
+        return render_template('profile.html', username = username, pet_name = pet_name, pet_breed = pet_breed, profile_picture = profile_picture)
+
+    except sqlite3.Error as e:
+        print(f"Database error: {e}")
+        flash("An error occured. Please try again.")
+        return redirect(url_for('home'))
+
+@app.route('/update_profile_picture', methods=['POST'])
+@login_required
+def update_profile_picture():
+    user_id = session['user_id']
+    file = request.files.get('profile_picture')
+    
+    if file and allowed_file(file.filename):
+        filename = os.path.join('static/uploads/profile', secure_filename(file.filename))
+        file.save(filename)
+
+        try:
+            db_connection = sqlite3.connect('data/database.db')
+            cursor = db_connection.cursor()
+            cursor.execute('UPDATE Users SET profile_picture = ? WHERE user_id = ?', ('uploads/profile/' + secure_filename(file.filename), user_id))
+            db_connection.commit()
+            db_connection.close()
+
+            flash ("Profile picture updated successfully!")
+        except sqlite3.Error as e:
+            print(f"Database error: {e}")
+            flash("An error occurred while updating your profile pictre. Please try again.")
+    return redirect(url_for('profile'))
+
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
@@ -163,7 +214,7 @@ def create_post():
         file.save(file_path)
 
         # Save post details to the database
-        user_id = request.form.get('user_id')  # Sent from the form
+        user_id = session['user_id']  # Sent from the form
         caption = request.form.get('content')  # Sent from the form
         if not user_id or not caption:
             return jsonify({'error': 'Missing required fields'}), 400
@@ -188,13 +239,13 @@ def create_post():
 @app.route('/fetch_posts', methods=['GET'])
 def fetch_posts():
     try:
-        user_id = 1  # Hardcoding user_id for now; replace with dynamic user session later
+        user_id = session['user_id']  # Current logged-in user
         db_connection = sqlite3.connect('data/database.db')
         cursor = db_connection.cursor()
 
-        # Query to fetch posts, like counts, and if the current user liked each post
+        # Fetch posts with user details and like status
         cursor.execute('''
-            SELECT Posts.post_id, Users.username, Posts.content, Posts.image_url, Posts.created_at,
+            SELECT Posts.post_id, Users.user_id, Users.username, Posts.content, Posts.image_url, Posts.created_at,
                    (SELECT COUNT(*) FROM Likes WHERE Likes.post_id = Posts.post_id) AS like_count,
                    EXISTS (SELECT 1 FROM Likes WHERE Likes.post_id = Posts.post_id AND Likes.user_id = ?) AS user_liked
             FROM Posts
@@ -204,16 +255,17 @@ def fetch_posts():
         posts = cursor.fetchall()
         db_connection.close()
 
-        # Structure posts as a list of dictionaries
+        # Structure posts with user_id for linking profiles
         posts_list = [
             {
                 'post_id': post[0],
-                'username': post[1],
-                'content': post[2],
-                'image_url': post[3],
-                'created_at': post[4],
-                'like_count': post[5],
-                'user_liked': bool(post[6])  # Convert the 0/1 result to a boolean
+                'user_id': post[1],  # Added for linking profile
+                'username': post[2],
+                'content': post[3],
+                'image_url': post[4],
+                'created_at': post[5],
+                'like_count': post[6],
+                'user_liked': bool(post[7])
             }
             for post in posts
         ]
@@ -224,12 +276,13 @@ def fetch_posts():
         print(f"Error in /fetch_posts: {e}")
         return jsonify({'error': str(e)}), 500
 
+
 @app.route('/add_comment', methods=['POST'])
 def add_comment():
     try:
         # Get comment details from the form
         post_id = request.form.get('post_id')
-        user_id = request.form.get('user_id')
+        user_id = session['user_id']
         content = request.form.get('content')
 
         print(f"Received comment data: post_id={post_id}, user_id={user_id}, content={content}")
@@ -258,17 +311,16 @@ def add_comment():
 @app.route('/fetch_comments', methods=['GET'])
 def fetch_comments():
     try:
-        post_id = request.args.get('post_id')  # Get the post_id from the query parameter
+        post_id = request.args.get('post_id')
         if not post_id:
             return jsonify({'error': 'Post ID is required'}), 400
 
-        # Connect to the database
         db_connection = sqlite3.connect('data/database.db')
         cursor = db_connection.cursor()
 
-        # Query to fetch comments for the given post_id
+        # Fetch comments with user details
         cursor.execute('''
-            SELECT Users.username, Comments.content, Comments.created_at
+            SELECT Users.user_id, Users.username, Comments.content, Comments.created_at
             FROM Comments
             JOIN Users ON Comments.user_id = Users.user_id
             WHERE Comments.post_id = ?
@@ -277,17 +329,18 @@ def fetch_comments():
         comments = cursor.fetchall()
         db_connection.close()
 
-        # Structure comments as a list of dictionaries
+        # Structure comments with user_id for linking profiles
         comments_list = [
             {
-                'username': comment[0],
-                'content': comment[1],
-                'created_at': comment[2]
+                'user_id': comment[0],  # Added for profile linking
+                'username': comment[1],
+                'content': comment[2],
+                'created_at': comment[3]
             }
             for comment in comments
         ]
 
-        return jsonify(comments_list)  # Return the comments as JSON
+        return jsonify(comments_list)
 
     except Exception as e:
         print(f"Error in /fetch_comments: {e}")
@@ -297,7 +350,7 @@ def fetch_comments():
 def like_post():
     try:
         post_id = request.form.get('post_id')
-        user_id = request.form.get('user_id')  # Replace with session-based user_id when ready
+        user_id = session['user_id']  # Fetch user ID from session
         if not post_id or not user_id:
             return jsonify({'error': 'Missing post_id or user_id'}), 400
 
@@ -327,7 +380,7 @@ def like_post():
         return jsonify({'error': str(e)}), 500
 
     finally:
-        db_connection.close()  # Ensure the connection is always closed
+        db_connection.close()
 
 @app.route('/user_profile/<int:user_id>', methods=['GET'])
 def user_profile(user_id):
@@ -365,6 +418,7 @@ def user_profile(user_id):
     except Exception as e:
         print(f"Error in /user_profile: {e}")
         return render_template('user_profile.html', error="An error occurred.")
+
 
 if __name__ == '__main__':
     app.run(debug=True)

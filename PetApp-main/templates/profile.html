@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PetApp - Profile</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/profile-style.css') }}">
+</head>
+<body>
+
+  <div class="profile-container">
+
+    <div class="profile-picture">
+      <img src="{{ url_for('static', filename='assets/default-profile-pic.png') }}" alt="Profile Picture" id="profile-pic">
+      <button onclick="showImageSelection()">Change Profile Picture</button>
+    </div>
+
+    <div class="user-info">
+      <h2>Username: JohnDoe</h2>
+      <p>Followers: 250</p>
+      <p>Following: 180</p>
+      <p>Badges: 3</p>
+      <p>Pet Info: Fluffy (Golden Retriever)</p>
+    </div>
+
+    <div id="image-selection-modal" class="modal" style="display: none;">
+      <div class="modal-content">
+        <span class="close" onclick="closeImageSelection()">&times;</span>
+        <h3>Select a New Profile Picture</h3>
+        <div class="image-options">
+          <img src="{{ url_for('static', filename='assets/cat-profile.png') }}" alt="Profile 1" onclick="selectProfilePicture('cat-profile.png')">
+          <img src="{{ url_for('static', filename='assets/pig-profile.png') }}" alt="Profile 2" onclick="selectProfilePicture('pig-profile.png')">
+          <img src="{{ url_for('static', filename='assets/pug-profile.png') }}" alt="Profile 3" onclick="selectProfilePicture('pug-profile.png')">
+          <img src="{{ url_for('static', filename='assets/rabbit-profile.png') }}" alt="Profile 3" onclick="selectProfilePicture('rabbit-profile.png')">
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+
+  <nav class="bottom-nav">
+    <a href="{{ url_for('home') }}" class="nav-item">
+      <img src="{{ url_for('static', filename='assets/home-icon.png') }}" alt="Home" />
+      <span>Home</span>
+    </a>
+    <a href="{{ url_for('search') }}" class="nav-item">
+      <img src="{{ url_for('static', filename='assets/search-icon.png') }}" alt="Search" />
+      <span>Search</span>
+    </a>
+    <a href="{{ url_for('map_page') }}" class="nav-item">
+      <img src="{{ url_for('static', filename='assets/map-icon.png') }}" alt="Map" />
+      <span>Map</span>
+    </a>
+    <a href="#" class="nav-item">
+      <img src="{{ url_for('static', filename='assets/profile-icon.png') }}" alt="Profile" />
+      <span>Profile</span>
+    </a>
+  </nav>
+
+  <script>
+    function showImageSelection() {
+
+      document.getElementById("image-selection-modal").style.display = "block";
+    }
+
+    function closeImageSelection() {
+
+      document.getElementById("image-selection-modal").style.display = "none";
+    }
+
+    function selectProfilePicture(imageName) {
+      document.getElementById("profile-pic").src = "{{ url_for('static', filename='assets/') }}" + imageName;
+      closeImageSelection();  
+    }
+  </script>
+
+</body>
+</html>

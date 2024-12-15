@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PetApp - Login</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f8f9fa;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+    .login-container {
+      background-color: #ffffff;
+      padding: 2rem;
+      border-radius: 8px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      width: 300px;
+      text-align: center;
+    }
+    .login-container h2 {
+      margin-bottom: 1rem;
+      color: #333;
+    }
+    .login-container input {
+      width: 100%;
+      padding: 0.5rem;
+      margin: 0.5rem 0;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+    }
+    .login-container button {
+      background-color: #007bff;
+      color: #ffffff;
+      border: none;
+      padding: 0.5rem 1rem;
+      margin-top: 1rem;
+      cursor: pointer;
+      width: 100%;
+      border-radius: 4px;
+      font-size: 1rem;
+    }
+    .login-container button:hover {
+      background-color: #0056b3;
+    }
+    .link {
+      margin-top: 1rem;
+      font-size: 0.9rem;
+    }
+    .link a {
+      color: #007bff;
+      text-decoration: none;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="login-container">
+    <h2>Login</h2>
+    <form action="{{ url_for('home') }}" method="get">
+      <input type="text" placeholder="Username" name="username" required />
+      <input type="password" placeholder="Password" name="password" required />
+      <button type="submit">Login</button>
+    </form>
+    <div class="link">
+      Don't have an account? <a href="#">Sign Up</a>
+    </div>
+  </div>
+
+</body>
+</html>

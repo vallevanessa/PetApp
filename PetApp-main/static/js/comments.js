@@ -1,3 +1,4 @@
+//we are not currently using this. currently the js code is in the home.html
 // Fetch posts from the backend and display them
 function fetchPosts() {
     fetch('/fetch_posts')

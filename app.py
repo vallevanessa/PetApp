@@ -1,10 +1,11 @@
-from flask import Flask, render_template, redirect, url_for, request, jsonify
+from flask import Flask, render_template, redirect, url_for, request, jsonify, session, flash
 from dotenv import load_dotenv
 from werkzeug.utils import secure_filename
 import requests
 import os
 import sqlite3
 import hashlib
+from functools import wraps
 
 app = Flask(__name__)
 
@@ -23,21 +24,114 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
-@app.route('/')
+def hash_password(password):
+    salt = "dietdrpepper"
+    password += salt
+    print(hashlib.sha256(password.encode('utf-8')).hexdigest())
+    return hashlib.sha256(password.encode('utf-8')).hexdigest()
+
+app.secret_key = os.getenv('SECRET_KEY', 'default_secret_key')
+PUBLIC_PATHS = ['/', '/login', '/register']
+
+@app.before_request
+def restrict_access():
+    # Check if the requested path is public or user is logged in
+    if request.path not in PUBLIC_PATHS and 'user_id' not in session:
+        flash("You must log in to access this page.")
+        return redirect(url_for('login'))
+
+@app.route('/', methods=['GET', 'POST'])
 def login():
+    if request.method == 'POST':
+        username = request.form.get('username')
+        password = request.form.get('password')
+        
+        hashed_password = hash_password(password)
+        
+        try:
+            db_connection = sqlite3.connect('data/database.db')  # Ensure this path is correct
+            cursor = db_connection.cursor()
+
+            cursor.execute(
+                'SELECT user_id FROM Users WHERE username = ? AND password = ?',
+                (username, hashed_password)
+            )
+            user = cursor.fetchone()
+            db_connection.close()
+
+            print(f"Hashed password: {hashed_password}")
+            print(f"Query result: {user}")
+
+            if user:
+                session['user_id'] = user[0]
+                flash("Login successful!", "success")
+                return redirect(url_for('home'))
+            else:
+                flash("Invalid username or password.", "danger")
+                return render_template('login.html')
+        except sqlite3.Error as e:
+            print(f"Database error: {e}")
+            flash("An error occurred. Please try again.", "danger")
+            return render_template('login.html')
     return render_template('login.html')
 
+
+################################################################################################################
+@app.route('/logout') # CURRENTLY NOT IMPLEMENTED
+def logout():
+    session.clear()  # Clear the session
+    flash("You have been logged out.")
+    return redirect(url_for('login'))
+################################################################################################################
+
+def login_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if 'user_id' not in session:
+            flash("You need to log in first!")
+            return redirect(url_for('login'))
+        return f(*args, **kwargs)
+    return decorated_function
+
+@app.route('/profile')
+@login_required
+def profile():
+    user_id = session['user_id']
+    # Fetch user data from the database...
+    return render_template('profile.html')
+
+@app.route('/register', methods=['GET', 'POST'])
+def register():
+    if request.method == 'POST':
+        username = request.form['username']
+        password = request.form['password']
+        hashed_password = hash_password(password)
+        
+        # Save user to database (placeholder logic)
+        try:
+            db_connection = sqlite3.connect('data/database.db')
+            cursor = db_connection.cursor()
+            cursor.execute(
+                'INSERT INTO Users (username, password) VALUES (?, ?)',
+                (username, hashed_password)
+            )
+            db_connection.commit()
+            db_connection.close()
+            return redirect(url_for('login'))  # Redirect to login page
+        except Exception as e:
+            print(f"Error during registration: {e}")
+            return render_template('register.html')
+    
+    return render_template('register.html')
+
 @app.route('/home')
+@login_required
 def home():
     return render_template('home.html')
 
 @app.route('/search')
 def search():
     return render_template('search.html')
-
-@app.route('/profile')
-def profile():
-    return render_template('profile.html')
 
 @app.route('/map')
 def map_page():
@@ -153,7 +247,6 @@ def fetch_posts():
     except Exception as e:
         print(f"Error in /fetch_posts: {e}")
         return jsonify({'error': str(e)}), 500
-
 
 @app.route('/add_comment', methods=['POST'])
 def add_comment():
@@ -296,36 +389,6 @@ def user_profile(user_id):
     except Exception as e:
         print(f"Error in /user_profile: {e}")
         return render_template('user_profile.html', error="An error occurred.")
-
-def hash_password(password):
-    salt = "dietdrpepper"
-    password += salt
-    return hashlib.sha256(password.encode('utf-8')).hexdigest()
-
-@app.route('/register', methods=['GET', 'POST'])
-def register():
-    if request.method == 'POST':
-        username = request.form['username']
-        password = request.form['password']
-        hashed_password = hash_password(password)
-        
-        # Save user to database (placeholder logic)
-        try:
-            db_connection = sqlite3.connect('data/database.db')
-            cursor = db_connection.cursor()
-            cursor.execute(
-                'INSERT INTO Users (username, password) VALUES (?, ?)',
-                (username, hashed_password)
-            )
-            db_connection.commit()
-            db_connection.close()
-            return redirect(url_for('login'))  # Redirect to login page
-        except Exception as e:
-            print(f"Error during registration: {e}")
-            return render_template('register.html')
-    
-    return render_template('register.html')
-
 
 if __name__ == '__main__':
     app.run(debug=True)

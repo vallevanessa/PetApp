@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PetApp - Search</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+
+
+    <p>search</p>
+    <nav class="bottom-nav">
+        <a href="{{ url_for('home') }}" class="nav-item">
+            <img src="{{ url_for('static', filename='assets/home-icon.png') }}" alt="Home" />
+            <span>Home</span>
+        </a>
+        <a href="{{ url_for('search') }}" class="nav-item">
+            <img src="{{ url_for('static', filename='assets/search-icon.png') }}" alt="Search" />
+            <span>Search</span>
+        </a>
+        <a href="{{ url_for('map_page') }}" class="nav-item">
+            <img src="{{ url_for('static', filename='assets/map-icon.png') }}" alt="Map" />
+            <span>Map</span>
+        </a>
+        <a href="{{ url_for('profile') }}" class="nav-item">
+            <img src="{{ url_for('static', filename='assets/profile-icon.png') }}" alt="Profile" />
+            <span>Profile</span>
+        </a>
+    </nav>
+</body>
+
+</html>

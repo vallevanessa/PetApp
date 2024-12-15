@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PetApp - Login</title>
+  <title>PetApp - Register</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
   <style>
     body {
@@ -15,7 +15,7 @@
       height: 100vh;
       margin: 0;
     }
-    .login-container {
+    .register-container {
       background-color: #ffffff;
       padding: 2rem;
       border-radius: 8px;
@@ -23,18 +23,18 @@
       width: 300px;
       text-align: center;
     }
-    .login-container h2 {
+    .register-container h2 {
       margin-bottom: 1rem;
       color: #333;
     }
-    .login-container input {
+    .register-container input {
       width: 100%;
       padding: 0.5rem;
       margin: 0.5rem 0;
       border: 1px solid #ddd;
       border-radius: 4px;
     }
-    .login-container button {
+    .register-container button {
       background-color: #007bff;
       color: #ffffff;
       border: none;
@@ -45,7 +45,7 @@
       border-radius: 4px;
       font-size: 1rem;
     }
-    .login-container button:hover {
+    .register-container button:hover {
       background-color: #0056b3;
     }
     .link {
@@ -60,15 +60,15 @@
 </head>
 <body>
 
-  <div class="login-container">
-    <h2>Login</h2>
-    <form action="{{ url_for('home') }}" method="get">
+  <div class="register-container">
+    <h2>Register</h2>
+    <form action="{{ url_for('register') }}" method="post">
       <input type="text" placeholder="Username" name="username" required />
       <input type="password" placeholder="Password" name="password" required />
-      <button type="submit">Login</button>
+      <button type="submit">Register</button>
     </form>
     <div class="link">
-      Don't have an account? <a href="{{ url_for('register') }}">Sign Up</a>
+      Already have an account? <a href="{{ url_for('login') }}">Login</a>
     </div>
   </div>
 

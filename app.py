@@ -4,6 +4,7 @@ from werkzeug.utils import secure_filename
 import requests
 import os
 import sqlite3
+import hashlib
 
 app = Flask(__name__)
 
@@ -295,6 +296,35 @@ def user_profile(user_id):
     except Exception as e:
         print(f"Error in /user_profile: {e}")
         return render_template('user_profile.html', error="An error occurred.")
+
+def hash_password(password):
+    salt = "dietdrpepper"
+    password += salt
+    return hashlib.sha256(password.encode('utf-8')).hexdigest()
+
+@app.route('/register', methods=['GET', 'POST'])
+def register():
+    if request.method == 'POST':
+        username = request.form['username']
+        password = request.form['password']
+        hashed_password = hash_password(password)
+        
+        # Save user to database (placeholder logic)
+        try:
+            db_connection = sqlite3.connect('data/database.db')
+            cursor = db_connection.cursor()
+            cursor.execute(
+                'INSERT INTO Users (username, password) VALUES (?, ?)',
+                (username, hashed_password)
+            )
+            db_connection.commit()
+            db_connection.close()
+            return redirect(url_for('login'))  # Redirect to login page
+        except Exception as e:
+            print(f"Error during registration: {e}")
+            return render_template('register.html')
+    
+    return render_template('register.html')
 
 
 if __name__ == '__main__':

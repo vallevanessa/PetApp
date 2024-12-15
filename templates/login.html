@@ -28,11 +28,13 @@
       color: #333;
     }
     .login-container input {
-      width: 100%;
-      padding: 0.5rem;
-      margin: 0.5rem 0;
-      border: 1px solid #ddd;
-      border-radius: 4px;
+    width: calc(100% - 1rem); /* Ensures consistency, including padding */
+    max-width: 280px;        /* Optional: Add a cap on the width */
+    padding: 0.5rem;
+    margin: 0.5rem 0;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    box-sizing: border-box; /* Ensures padding is included in the width */
     }
     .login-container button {
       background-color: #007bff;
@@ -56,12 +58,40 @@
       color: #007bff;
       text-decoration: none;
     }
+    .flash-messages {
+    max-height: 50px; /* Restrict max height */
+    overflow: hidden;
+    }
+    .flash-success, .flash-danger {
+        padding: 0.5rem;
+        border-radius: 4px;
+        margin-bottom: 1rem;
+    }
+    .flash-success {
+        background-color: #d4edda;
+        color: #155724;
+        border: 1px solid #c3e6cb;
+    }
+    .flash-danger {
+        background-color: #f8d7da;
+        color: #721c24;
+        border: 1px solid #f5c6cb;
+    }
   </style>
 </head>
 <body>
 
   <div class="login-container">
     <h2>Login</h2>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <div class="flash-messages">
+          {% for category, message in messages %}
+            <div class="flash-{{ category }}">{{ message }}</div>
+          {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
     <form action="{{ url_for('login') }}" method="post">
       <input type="text" placeholder="Username" name="username" required />
       <input type="password" placeholder="Password" name="password" required />

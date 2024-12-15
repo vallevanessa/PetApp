@@ -42,6 +42,10 @@ def restrict_access():
 
 @app.route('/', methods=['GET', 'POST'])
 def login():
+    if 'user_id' in session:
+        flash("You are already logged in!", "info")
+        return redirect(url_for('home'))  # Redirect to home if logged in
+
     if request.method == 'POST':
         username = request.form.get('username')
         password = request.form.get('password')
@@ -59,8 +63,8 @@ def login():
             user = cursor.fetchone()
             db_connection.close()
 
-            print(f"Hashed password: {hashed_password}")
-            print(f"Query result: {user}")
+            # print(f"Hashed password: {hashed_password}")
+            # print(f"Query result: {user}")
 
             if user:
                 session['user_id'] = user[0]
@@ -102,6 +106,10 @@ def profile():
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
+    if 'user_id' in session:
+        flash("You are already logged in!", "info")
+        return redirect(url_for('home'))  # Redirect to home if logged in
+
     if request.method == 'POST':
         username = request.form['username']
         password = request.form['password']
@@ -120,6 +128,7 @@ def register():
             return redirect(url_for('login'))  # Redirect to login page
         except Exception as e:
             print(f"Error during registration: {e}")
+            flash("An error occurred. Please try again.")
             return render_template('register.html')
     
     return render_template('register.html')

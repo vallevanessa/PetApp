@@ -77,7 +77,7 @@
               feed.innerHTML = '<p>Failed to load posts.</p>';
           });
   }
-
+  //will this add a change so i can push to github :/
   // Function to load comments for a specific post
   function loadComments(postId) {
       fetch(`/fetch_comments?post_id=${postId}`)
@@ -177,6 +177,7 @@
               // Reload comments for the post
               loadComments(postId);
               form.reset(); // Clear the comment form
+
           })
           .catch(error => {
               console.error('Error adding comment:', error);

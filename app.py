@@ -75,9 +75,9 @@ def login():
             return render_template('login.html')
     return render_template('login.html')
 
-
+# currently does not have an associated button
 ################################################################################################################
-@app.route('/logout') # CURRENTLY NOT IMPLEMENTED
+@app.route('/logout')
 def logout():
     session.clear()  # Clear the session
     flash("You have been logged out.")

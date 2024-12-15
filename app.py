@@ -143,42 +143,9 @@ def search():
     return render_template('search.html')
 
 @app.route('/map')
-def map_page():
-    return render_template('map.html')
-
-@app.route('/get_nearby_locations')
-def get_nearby_locations():
-    try:
-        # Get the location and type from query parameters
-        location = request.args.get('location', '37.3653,-120.4394')  # Default UC Merced location
-        place_type = request.args.get('type', 'park')
-        radius = 5000  # 5 km radius
-
-        # Split the location into lat and lon
-        lat, lon = location.split(',')
-
-        # Google Places API URL
-        url = f'https://maps.googleapis.com/maps/api/place/nearbysearch/json?location={lat},{lon}&radius={radius}&type={place_type}&key={GOOGLE_API_KEY}'
-
-        # Request data from Google Places API
-        response = requests.get(url)
-        
-        # Check if the response was successful
-        response.raise_for_status()  # This will raise an error if the response is not 200 OK
-
-        data = response.json()  # Parse the JSON response
-
-        return jsonify(data)
-
-    except requests.exceptions.RequestException as e:
-        # Handle any request errors
-        print(f"Error making request to Google API: {e}")
-        return jsonify({"error": "Error making request to Google API."}), 500
-
-    except Exception as e:
-        # Handle other exceptions
-        print(f"An error occurred: {e}")
-        return jsonify({"error": "Internal server error."}), 500
+def map_view():
+    google_api_key = os.getenv('GOOGLE_API_KEY')
+    return render_template('map.html', google_api_key=google_api_key)
 
 @app.route('/create_post', methods=['POST'])
 def create_post():

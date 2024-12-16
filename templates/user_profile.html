@@ -34,16 +34,15 @@
         <section class="user-posts">
             <h3>{{ user.username }}'s Posts</h3>
             {% if user.posts %}
-                {% for post in user.posts %}
-                    <div class="post">
-                        <p> {{user.posts}} </p>
-                        <!-- Correcting image path dynamically -->
-                        <img src="{{ url_for('static', filename=post[2].lstrip('static/')) }}" 
-                             alt="Post Image" style="max-width: 100%; height: auto;">
-                        <p>{{ post[1] }}</p>
-                        <small>Posted on: {{ post[3] }}</small>
-                    </div>
-                {% endfor %}
+            {% for post in user.posts %}
+            <div class="post">
+                <p>{{ post[1] }}</p>
+                <img src="{{ url_for('static', filename=post[2].replace('\\', '/').lstrip('static/')) }}" 
+                     alt="Post Image" style="max-width: 100%; height: auto;">
+                <small>Posted on: {{ post[3] }}</small>
+            </div>
+        {% endfor %}
+        
             {% else %}
                 <p>No posts yet.</p>
             {% endif %}

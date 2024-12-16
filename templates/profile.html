@@ -16,8 +16,13 @@
         <button id="save-btn" onclick="saveProfilePic()" style="display: none;">Save</button>
       </div>
       <div class="user-info">
-        <h2>Username: {{ username }}</h2>
-        <p>Pet Info: {{ pet_name }} ({{ pet_breed }})</p>
+        <h2>{{ username }}</h2>
+        <p><strong>Pet Name:</strong> {{ pet_name }}</p>
+        <p><strong>Pet Breed:</strong> {{ pet_breed }}</p>
+        <div class="followers-info">
+          <a href="javascript:void(0);" class="followers-link" data-toggle="modal" data-target="#followersModal">{{ followers }} Followers</a>
+          <a href="javascript:void(0);" class="following-link" data-toggle="modal" data-target="#followingModal">{{ following }} Following</a>
+        </div>
       </div>
       <div class="logout-button">
         <button onclick="window.location.href='{{ url_for('logout') }}'">Logout</button>
@@ -29,15 +34,12 @@
       {% if posts %}
         {% for post in posts %}
           <div class="post">
-            {% if post[2] %} 
+            {% if post[2] %}
               {% set fixed_image_path = post[2].replace('\\', '/') %}
-              <img src="{{ url_for('static', filename=fixed_image_path.lstrip('static/')) }}" 
-                   alt="Post Image" style="max-width: 100%; height: auto;">
+              <img src="{{ url_for('static', filename=fixed_image_path.lstrip('static/')) }}" alt="Post Image" style="max-width: 100%; height: auto;">
             {% endif %}
             <p>{{ post[1] }}</p>
-
             <small>Posted on: {{ post[3] }}</small>
-
             <form action="{{ url_for('delete_post', post_id=post[0]) }}" method="POST" style="margin-top: 10px;">
               <button type="submit" style="background-color: red; color: white; border: none; padding: 5px 10px; cursor: pointer;">
                 Delete Post
@@ -51,6 +53,22 @@
       {% endif %}
     </div>
   </div>
+
+<div class="modal" id="followersModal">
+  <div class="modal-content">
+    <span class="close" onclick="closeModal('followersModal')">&times;</span>
+    <h2>Followers</h2>
+    <ul id="followersList"></ul>
+  </div>
+</div>
+
+<div class="modal" id="followingModal">
+  <div class="modal-content">
+    <span class="close" onclick="closeModal('followingModal')">&times;</span>
+    <h2>Following</h2>
+    <ul id="followingList"></ul>
+  </div>
+</div>
 
   <nav class="bottom-nav">
     <a href="{{ url_for('home') }}" class="nav-item">
@@ -69,6 +87,79 @@
         <img src="{{ url_for('static', filename='assets/profile-icon.png') }}" alt="Profile" />
         <span>Profile</span>
     </a>
-</nav>
+  </nav>
+
+  <script>
+    function openModal(modalId) {
+      document.getElementById(modalId).style.display = "block";
+    }
+
+    function closeModal(modalId) {
+      document.getElementById(modalId).style.display = "none";
+    }
+
+    function loadList(type) {
+      fetch(`/get_${type}`)
+        .then(response => response.json())
+        .then(data => {
+          let list = document.getElementById(`${type}List`);
+          list.innerHTML = '';
+          data.forEach(user => {
+            let li = document.createElement('li');
+            li.innerHTML = `<a href="/user_profile/${user.user_id}">${user.username}</a>`; // Updated link
+            list.appendChild(li);
+          });
+        })
+        .catch(error => console.error('Error:', error));
+    }
+
+    document.querySelector('.followers-link').addEventListener('click', function () {
+      loadList('followers');
+      openModal('followersModal');
+    });
+
+    document.querySelector('.following-link').addEventListener('click', function () {
+      loadList('following');
+      openModal('followingModal');
+    });
+
+    function updateProfilePic() {
+      var fileInput = document.getElementById("profile-pic-input");
+      var file = fileInput.files[0];
+      var reader = new FileReader();
+
+      reader.onloadend = function () {
+        var profilePic = document.getElementById("profile-pic");
+        profilePic.src = reader.result;
+        document.getElementById("save-btn").style.display = 'block';
+      }
+
+      if (file) {
+        reader.readAsDataURL(file);
+      }
+    }
+
+    function saveProfilePic() {
+      var formData = new FormData();
+      var fileInput = document.getElementById("profile-pic-input");
+      formData.append('profile_picture', fileInput.files[0]);
+
+      fetch('{{ url_for("update_profile_picture") }}', {
+        method: 'POST',
+        body: formData,
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          alert('Profile picture updated!');
+        } else {
+          alert('Failed to update profile picture.');
+        }
+      });
+
+      document.getElementById("save-btn").style.display = 'none';
+    }
+</script>
+
 </body>
 </html>

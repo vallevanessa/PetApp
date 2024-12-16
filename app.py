@@ -119,22 +119,84 @@ def profile():
 
         cursor.execute('SELECT post_id, content, image_url, created_at FROM Posts WHERE user_id = ?', (user_id,))
         posts = cursor.fetchall()  
+
+        cursor.execute('SELECT COUNT(*) FROM Followers WHERE followed_id = ?', (user_id,))
+        followers_count = cursor.fetchone()[0]
+
+        cursor.execute('SELECT COUNT(*) FROM Followers WHERE follower_id = ?', (user_id,))
+        following_count = cursor.fetchone()[0]
+
         db_connection.close()
 
         return render_template(
-            'profile.html', 
-            username=username, 
-            pet_name=pet_name, 
-            pet_breed=pet_breed, 
-            profile_picture=profile_picture,
-            posts=posts
-        )
+    'profile.html', 
+    username=username, 
+    pet_name=pet_name, 
+    pet_breed=pet_breed, 
+    profile_picture=profile_picture,
+    posts=posts,
+    followers=followers_count,
+    following=following_count,
+    user_id=user_id 
+)
+
 
     except sqlite3.Error as e:
         print(f"Database error: {e}")
         flash("An error occurred. Please try again.")
         return redirect(url_for('home'))
 
+
+
+@app.route('/get_followers')
+@login_required
+def get_followers():
+    user_id = session['user_id']
+    try:
+        db_connection = sqlite3.connect('data/database.db')
+        cursor = db_connection.cursor()
+
+        cursor.execute('''
+            SELECT Users.user_id, Users.username
+            FROM Followers
+            JOIN Users ON Followers.follower_id = Users.user_id
+            WHERE Followers.followed_id = ?
+        ''', (user_id,))
+        followers = cursor.fetchall()
+
+        db_connection.close()
+
+        # Return the list as JSON
+        return jsonify([{'user_id': follower[0], 'username': follower[1]} for follower in followers])
+
+    except sqlite3.Error as e:
+        print(f"Database error: {e}")
+        return jsonify([])
+
+@app.route('/get_following')
+@login_required
+def get_following():
+    user_id = session['user_id']
+    try:
+        db_connection = sqlite3.connect('data/database.db')
+        cursor = db_connection.cursor()
+
+        cursor.execute('''
+            SELECT Users.user_id, Users.username
+            FROM Followers
+            JOIN Users ON Followers.followed_id = Users.user_id
+            WHERE Followers.follower_id = ?
+        ''', (user_id,))
+        following = cursor.fetchall()
+
+        db_connection.close()
+
+        # Return the list as JSON
+        return jsonify([{'user_id': follow[0], 'username': follow[1]} for follow in following])
+
+    except sqlite3.Error as e:
+        print(f"Database error: {e}")
+        return jsonify([])
 
 @app.route('/delete_post/<int:post_id>', methods=['POST'])
 @login_required

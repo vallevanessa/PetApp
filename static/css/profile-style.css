@@ -1,149 +1,210 @@
+/* General Reset */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
 
+/* Body Styling */
 body {
-    font-family: Arial, sans-serif;
-    background-color: #fafafa;
-    margin: 0;
-    padding: 0;
-  }
+  font-family: Arial, sans-serif;
+  line-height: 1.6;
+  background-color: #fafafa;
+  color: #333;
+}
 
-  .profile-container {
-    max-width: 600px;
-    margin: 20px auto;
-    padding: 20px;
-    background-color: white;
-    border-radius: 8px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  }
-  
-  .profile-picture {
-    text-align: center;
-    margin-bottom: 20px;
-  }
-  
-  .profile-picture img {
-    width: 120px;
-    height: 120px;
-    border-radius: 50%;
-    object-fit: cover;
-    border: 3px solid #ddd;
-  }
-  
-  .profile-picture button {
-    display: inline-block;
-    padding: 8px 16px;
-    margin-top: 10px;
-    background-color: #0095f6;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 14px;
-  }
-  
-  .profile-picture button:hover {
-    background-color: #007bb5;
-  }
-  
-  .user-info {
-    text-align: center;
-    margin-bottom: 20px;
-  }
-  
-  .user-info h2 {
-    font-size: 24px;
-    font-weight: bold;
-    margin: 10px 0;
-  }
-  
-  .user-info p {
-    font-size: 16px;
-    color: #666;
-  }
+/* Profile Container */
+.profile-container {
+  max-width: 800px;
+  margin: 20px auto;
+  padding: 20px;
+  background-color: #fff;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
 
-  .modal {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.7);
-    display: none;
-    justify-content: center;
-    align-items: center;
-  }
-  
-  .modal-content {
-    background-color: white;
-    padding: 20px;
-    border-radius: 8px;
-    max-width: 400px;
-    width: 100%;
-    text-align: center;
-  }
-  
-  .modal-content h3 {
-    font-size: 18px;
-    margin-bottom: 15px;
-  }
-  
-  .image-options {
-    display: flex;
-    justify-content: space-around;
-    flex-wrap: wrap;
-  }
-  
-  .image-options img {
-    width: 80px;
-    height: 80px;
-    border-radius: 50%;
-    margin: 10px;
-    cursor: pointer;
-    transition: transform 0.3s ease;
-  }
-  
-  .image-options img:hover {
-    transform: scale(1.1);
-  }
-  
+/* Profile Header */
+.profile-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  margin-bottom: 20px;
+  position: relative;
+}
 
-  .close {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    font-size: 30px;
-    font-weight: bold;
-    cursor: pointer;
-    color: #333;
-  }
-  
-  .close:hover {
-    color: #f44336;
-  }
- 
-  .bottom-nav {
-    position: fixed;
-    bottom: 0;
-    width: 100%;
-    background-color: white;
-    display: flex;
-    justify-content: space-around;
-    padding: 10px 0;
-    box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1);
-  }
-  
-  .nav-item {
-    text-align: center;
-    font-size: 14px;
-    color: #555;
-  }
-  
-  .nav-item img {
-    width: 24px;
-    height: 24px;
-    margin-bottom: 4px;
-  }
-  
-  .nav-item:hover {
-    color: #0095f6;
-  }
-  
+.profile-picture {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+}
+
+.profile-picture img {
+  width: 150px;
+  height: 150px;
+  border-radius: 50%;
+  object-fit: cover; /* Ensures the image maintains aspect ratio without stretching */
+}
+
+
+.profile-header button {
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  cursor: pointer;
+  font-size: 14px;
+  border-radius: 20px;
+  margin-left: 10px; /* Adds space between the profile pic and button */
+}
+
+/* Position Change Profile Pic Button */
+#change-profile-pic-btn {
+  position: relative;
+  margin-left: 20px; /* Moves button to the right of the profile picture */
+}
+
+#save-btn {
+  position: absolute;
+  bottom: -70px; /* Adjust to avoid overlap */
+  right: 0;
+  z-index: 0;
+  background-color: #007BFF;
+  padding: 8px 16px;
+}
+
+/* User Info */
+.user-info {
+  margin-bottom: 20px;
+}
+
+.user-info h2 {
+  font-size: 24px;
+  color: #4CAF50;
+}
+
+.user-info p {
+  font-size: 16px;
+  margin: 5px 0;
+}
+
+.followers-info p {
+  font-size: 14px;
+  color: #555;
+}
+
+.followers-info {
+  display: flex;
+  gap: 20px;  /* Adds space between the links */
+  margin-top: 10px;
+}
+
+.followers-link, .following-link {
+  font-size: 16px;
+  color: #007bff;
+  text-decoration: none;  /* Removes underline */
+}
+
+.followers-link:hover, .following-link:hover {
+  text-decoration: underline;  /* Underline on hover */
+}
+
+
+/* Bottom Navigation Bar */
+.bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  background-color: #fff;
+  border-top: 1px solid #ddd;
+  box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1);
+  padding: 0.5rem 0;
+}
+
+.bottom-nav .nav-item {
+  text-align: center;
+  text-decoration: none;
+  color: #555;
+  font-size: 0.8rem;
+}
+
+.bottom-nav img {
+  width: 24px;
+  height: 24px;
+  margin-bottom: 0.2rem;
+}
+
+.bottom-nav .nav-item:hover {
+  color: #4CAF50;
+}
+
+.bottom-nav .nav-item:active {
+  color: #388E3C;
+}
+
+
+/* Modal background */
+.modal {
+  display: none; /* Hidden by default */
+  position: fixed;
+  z-index: 1;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0,0,0,0.4); /* Black with opacity */
+  padding-top: 60px;
+}
+
+/* Modal content */
+.modal-content {
+  background-color: #fefefe;
+  margin: 5% auto;
+  padding: 20px;
+  border: 1px solid #888;
+  width: 80%;
+  max-width: 500px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  border-radius: 10px;
+}
+
+/* Close button */
+.close {
+  color: #aaa;
+  float: right;
+  font-size: 28px;
+  font-weight: bold;
+}
+
+.close:hover,
+.close:focus {
+  color: black;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+/* Styling the follower/following list */
+ul {
+  list-style-type: none;
+  padding: 0;
+}
+
+ul li {
+  margin: 10px 0;
+}
+
+ul li a {
+  color: #007bff;
+  text-decoration: none;
+}
+
+ul li a:hover {
+  text-decoration: underline;
+}

@@ -101,7 +101,6 @@ def login_required(f):
 @login_required
 def profile():
     user_id = session['user_id']
-    # Fetch user data from the database...
     try:
         db_connection = sqlite3.connect('data/database.db')
         cursor = db_connection.cursor()
@@ -109,27 +108,58 @@ def profile():
         cursor.execute('SELECT username, pet_name, pet_breed, profile_picture FROM Users WHERE user_id = ?', (user_id,))
         user_data = cursor.fetchone()
 
-        print("fetched user data: ", user_data)
-
         if not user_data:
             flash("User not found")
             return redirect(url_for('home'))
         
         username, pet_name, pet_breed, profile_picture = user_data
-
         if not profile_picture:
             profile_picture = '/assets/default-profile-pic.png'
-            print("No profile picture found, using default: ", profile_picture)
+
+
+        cursor.execute('SELECT post_id, content, image_url, created_at FROM Posts WHERE user_id = ?', (user_id,))
+        posts = cursor.fetchall()  
         db_connection.close()
 
-        print("Profile picture URL:", url_for('static', filename=profile_picture))
-
-        return render_template('profile.html', username = username, pet_name = pet_name, pet_breed = pet_breed, profile_picture = profile_picture)
+        return render_template(
+            'profile.html', 
+            username=username, 
+            pet_name=pet_name, 
+            pet_breed=pet_breed, 
+            profile_picture=profile_picture,
+            posts=posts
+        )
 
     except sqlite3.Error as e:
         print(f"Database error: {e}")
-        flash("An error occured. Please try again.")
+        flash("An error occurred. Please try again.")
         return redirect(url_for('home'))
+
+
+@app.route('/delete_post/<int:post_id>', methods=['POST'])
+@login_required
+def delete_post(post_id):
+    user_id = session['user_id']
+    try:
+        db_connection = sqlite3.connect('data/database.db')
+        cursor = db_connection.cursor()
+
+        cursor.execute('SELECT post_id FROM Posts WHERE post_id = ? AND user_id = ?', (post_id, user_id))
+        post = cursor.fetchone()
+
+        if not post:
+            flash("Post not found or you don't have permission to delete it.")
+            return redirect(url_for('profile'))
+
+        cursor.execute('DELETE FROM Posts WHERE post_id = ?', (post_id,))
+        db_connection.commit()
+        db_connection.close()
+
+        flash("Post deleted successfully!")
+    except sqlite3.Error as e:
+        print(f"Database error: {e}")
+        flash("An error occurred while deleting the post. Please try again.")
+    return redirect(url_for('profile'))
 
 @app.route('/update_profile_picture', methods=['POST'])
 @login_required
@@ -385,7 +415,6 @@ def like_post():
 @app.route('/user_profile/<int:user_id>', methods=['GET'])
 def user_profile(user_id):
     try:
-        # Connect to the database
         db_connection = sqlite3.connect('data/database.db')
         cursor = db_connection.cursor()
 
@@ -395,6 +424,20 @@ def user_profile(user_id):
 
         if not user_data:
             return render_template('user_profile.html', error="User not found.")
+
+        # Check if the current user is following the profile user
+        is_following = False
+        if 'user_id' in session:
+            cursor.execute('SELECT 1 FROM Followers WHERE follower_id = ? AND followed_id = ?', 
+                           (session['user_id'], user_id))
+            is_following = cursor.fetchone() is not None
+
+        # Fetch followers and following counts
+        cursor.execute('SELECT COUNT(*) FROM Followers WHERE followed_id = ?', (user_id,))
+        followers = cursor.fetchone()[0]
+
+        cursor.execute('SELECT COUNT(*) FROM Followers WHERE follower_id = ?', (user_id,))
+        following = cursor.fetchone()[0]
 
         # Fetch the user's posts
         cursor.execute('''
@@ -406,18 +449,84 @@ def user_profile(user_id):
         user_posts = cursor.fetchall()
         db_connection.close()
 
-        # Pass the data to the user profile template
+        # Pass data to the template
         return render_template('user_profile.html', user={
             'username': user_data[0],
             'pet_name': user_data[1],
             'pet_breed': user_data[2],
             'profile_picture': user_data[3],
-            'posts': user_posts
-        })
+            'user_id': user_id,
+            'posts': user_posts,
+            'is_following': is_following
+        }, followers=followers, following=following)
 
     except Exception as e:
         print(f"Error in /user_profile: {e}")
         return render_template('user_profile.html', error="An error occurred.")
+
+
+@app.route('/follow', methods=['POST'])
+@login_required
+def follow():
+    try:
+        follower_id = session['user_id']  # The logged-in user
+        followed_id = request.form.get('followed_id')  # The user to follow/unfollow
+
+        if not followed_id or int(followed_id) == follower_id:
+            return jsonify({'error': 'Invalid user ID'}), 400
+
+        db_connection = sqlite3.connect('data/database.db')
+        cursor = db_connection.cursor()
+
+        # Check if already following
+        cursor.execute('SELECT * FROM Followers WHERE follower_id = ? AND followed_id = ?', 
+                       (follower_id, followed_id))
+        existing_follow = cursor.fetchone()
+
+        if existing_follow:
+            # Unfollow logic
+            cursor.execute('DELETE FROM Followers WHERE follower_id = ? AND followed_id = ?', 
+                           (follower_id, followed_id))
+            message = 'Unfollowed'
+            is_following = False
+        else:
+            # Follow logic
+            cursor.execute('INSERT INTO Followers (follower_id, followed_id, followed_at) VALUES (?, ?, datetime("now"))', 
+                           (follower_id, followed_id))
+            message = 'Followed'
+            is_following = True
+
+        db_connection.commit()
+        db_connection.close()
+
+        return jsonify({'message': message, 'is_following': is_following}), 200
+
+    except Exception as e:
+        print(f"Error in /follow: {e}")
+        return jsonify({'error': 'An error occurred'}), 500
+    
+@app.route('/follow_stats/<int:user_id>', methods=['GET'])
+def follow_stats(user_id):
+    try:
+        db_connection = sqlite3.connect('data/database.db')
+        cursor = db_connection.cursor()
+
+        # Count followers
+        cursor.execute('SELECT COUNT(*) FROM Followers WHERE followed_id = ?', (user_id,))
+        followers_count = cursor.fetchone()[0]
+
+        # Count following
+        cursor.execute('SELECT COUNT(*) FROM Followers WHERE follower_id = ?', (user_id,))
+        following_count = cursor.fetchone()[0]
+
+        db_connection.close()
+
+        return jsonify({'followers': followers_count, 'following': following_count}), 200
+
+    except Exception as e:
+        print(f"Error in /follow_stats: {e}")
+        return jsonify({'error': 'An error occurred'}), 500
+
 
 
 if __name__ == '__main__':

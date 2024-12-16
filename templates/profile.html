@@ -11,85 +11,64 @@
     <div class="profile-header">
       <div class="profile-picture">
         <img src="{{ url_for('static', filename=profile_picture) }}" alt="Profile Picture" id="profile-pic">
-
         <button id="change-profile-pic-btn" onclick="document.getElementById('profile-pic-input').click()">Change Profile Picture</button>
-
         <input type="file" name="profile_picture" id="profile-pic-input" accept="image/*" onchange="updateProfilePic()" style="display: none;">
-
         <button id="save-btn" onclick="saveProfilePic()" style="display: none;">Save</button>
       </div>
       <div class="user-info">
         <h2>Username: {{ username }}</h2>
-        <p>Followers: {{ followers }}</p>
-        <p>Following: {{ following }}</p>
-        <p>Badges: {{ badges }}</p>
         <p>Pet Info: {{ pet_name }} ({{ pet_breed }})</p>
+      </div>
+      <div class="logout-button">
+        <button onclick="window.location.href='{{ url_for('logout') }}'">Logout</button>
       </div>
     </div>
 
-    <div class="logout-button">
-      <button onclick="window.location.href='{{ url_for('logout') }}'">Logout</button>
+    <div class="user-posts">
+      <h3>Your Posts</h3>
+      {% if posts %}
+        {% for post in posts %}
+          <div class="post">
+            {% if post[2] %} 
+              {% set fixed_image_path = post[2].replace('\\', '/') %}
+              <img src="{{ url_for('static', filename=fixed_image_path.lstrip('static/')) }}" 
+                   alt="Post Image" style="max-width: 100%; height: auto;">
+            {% endif %}
+            <p>{{ post[1] }}</p>
+
+            <small>Posted on: {{ post[3] }}</small>
+
+            <form action="{{ url_for('delete_post', post_id=post[0]) }}" method="POST" style="margin-top: 10px;">
+              <button type="submit" style="background-color: red; color: white; border: none; padding: 5px 10px; cursor: pointer;">
+                Delete Post
+              </button>
+            </form>
+          </div>
+          <hr>
+        {% endfor %}
+      {% else %}
+        <p>You haven't posted anything yet.</p>
+      {% endif %}
     </div>
   </div>
 
   <nav class="bottom-nav">
-    {% set active_page = 'profile' %}
-    <a href="{{ url_for('home') }}" class="nav-item {% if active_page == 'home' %}active{% endif %}">
-      <img src="{{ url_for('static', filename='assets/home-icon.png') }}" alt="Home" />
-      <span>Home</span>
+    <a href="{{ url_for('home') }}" class="nav-item">
+        <img src="{{ url_for('static', filename='assets/home-icon.png') }}" alt="Home" />
+        <span>Home</span>
     </a>
-    <a href="{{ url_for('search') }}" class="nav-item {% if active_page == 'search' %}active{% endif %}">
-      <img src="{{ url_for('static', filename='assets/search-icon.png') }}" alt="Search" />
-      <span>Search</span>
+    <a href="{{ url_for('search') }}" class="nav-item">
+        <img src="{{ url_for('static', filename='assets/search-icon.png') }}" alt="Search" />
+        <span>Search</span>
     </a>
-    <a href="{{ url_for('map_view') }}" class="nav-item {% if active_page == 'map' %}active{% endif %}">
-      <img src="{{ url_for('static', filename='assets/map-icon.png') }}" alt="Map" />
-      <span>Map</span>
+    <a href="{{ url_for('map_view') }}" class="nav-item">
+        <img src="{{ url_for('static', filename='assets/map-icon.png') }}" alt="Map" />
+        <span>Map</span>
     </a>
-    <a href="{{ url_for('profile') }}" class="nav-item {% if active_page == 'profile' %}active{% endif %}">
-      <img src="{{ url_for('static', filename='assets/profile-icon.png') }}" alt="Profile" />
-      <span>Profile</span>
+    <a href="{{ url_for('profile') }}" class="nav-item">
+        <img src="{{ url_for('static', filename='assets/profile-icon.png') }}" alt="Profile" />
+        <span>Profile</span>
     </a>
-  </nav>
-
-  <script>
-
-    function updateProfilePic() {
-      var fileInput = document.getElementById("profile-pic-input");
-      var file = fileInput.files[0];
-      var reader = new FileReader();
-
-      reader.onloadend = function () {
-        var profilePic = document.getElementById("profile-pic");
-        profilePic.src = reader.result; 
-        document.getElementById("save-btn").style.display = 'block'; 
-      }
-
-      if (file) {
-        reader.readAsDataURL(file);  
-      }
-    }
-
-    function saveProfilePic() {
-      var formData = new FormData();
-      var fileInput = document.getElementById("profile-pic-input");
-      formData.append('profile_picture', fileInput.files[0]);
-
-      fetch('{{ url_for("update_profile_picture") }}', {
-        method: 'POST',
-        body: formData,
-      })
-      .then(response => response.json())
-      .then(data => {
-        if (data.success) {
-          alert('Profile picture updated!');
-        } else {
-          alert('Failed to update profile picture.');
-        }
-      });
-
-      document.getElementById("save-btn").style.display = 'none';
-    }
-  </script>
+</nav>
 </body>
 </html>

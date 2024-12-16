@@ -14,11 +14,20 @@
     <div class="profile-container">
         <!-- User Details -->
         <div class="user-details">
-            <img src="{{ user.profile_picture or url_for('static', filename='assets/default-profile-pic.png') }}" 
-                 alt="Profile Picture" class="profile-pic">
+            <img src="{{ url_for('static', filename=user.profile_picture.lstrip('static/')) if user.profile_picture else url_for('static', filename='assets/default-profile-pic.png') }}"
+                alt="Profile Picture" class="profile-pic">
             <h2>{{ user.username }}</h2>
             <p><strong>Pet Name:</strong> {{ user.pet_name or 'N/A' }}</p>
             <p><strong>Pet Breed:</strong> {{ user.pet_breed or 'N/A' }}</p>
+            
+            <!-- Follow/Unfollow Button - only shown if not viewing own profile -->
+            {% if session['user_id'] != user.user_id %}
+            <button id="follow-btn" data-followed-id="{{ user.user_id }}">
+                {{ 'Unfollow' if user.is_following else 'Follow' }}
+            </button>            
+            {% endif %}
+            <p id="followers-count">{{ followers }} Followers</p>
+            <p id="following-count">{{ following }} Following</p>
         </div>
 
         <!-- User Posts -->
@@ -27,6 +36,7 @@
             {% if user.posts %}
                 {% for post in user.posts %}
                     <div class="post">
+                        <p> {{user.posts}} </p>
                         <!-- Correcting image path dynamically -->
                         <img src="{{ url_for('static', filename=post[2].lstrip('static/')) }}" 
                              alt="Post Image" style="max-width: 100%; height: auto;">
@@ -59,5 +69,46 @@
             <span>Profile</span>
         </a>
     </nav>
+
+    <!-- Follow/Unfollow Script -->
+    <script>
+    // Follow/Unfollow Button Logic
+    document.getElementById('follow-btn')?.addEventListener('click', function () {
+        const button = this;
+        const followedId = button.getAttribute('data-followed-id');
+
+        fetch('/follow', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: new URLSearchParams({
+                followed_id: followedId,  // Ensure this matches the route parameter name
+            }),
+        })
+        .then(response => response.json())
+        .then(data => {
+            console.log('Follow Response:', data);
+            if (data.message === 'Followed') {
+                button.textContent = 'Unfollow';
+            } else if (data.message === 'Unfollowed') {
+                button.textContent = 'Follow';
+            }
+            updateFollowersCount(followedId);
+        })
+        .catch(error => console.error('Fetch Error:', error));
+    });
+
+    // Function to Update Followers Count
+    function updateFollowersCount(userId) {
+        fetch(`/follow_stats/${userId}`)
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('followers-count').textContent = `${data.followers} Followers`;
+                document.getElementById('following-count').textContent = `${data.following} Following`;
+            })
+            .catch(error => console.error('Error fetching followers count:', error));
+    }
+    </script>
 </body>
 </html>

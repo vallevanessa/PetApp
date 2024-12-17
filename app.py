@@ -79,14 +79,11 @@ def login():
             return render_template('login.html')
     return render_template('login.html')
 
-# currently does not have an associated button
-################################################################################################################
 @app.route('/logout')
 def logout():
     session.clear()  # Clear the session
     flash("You have been logged out.")
     return redirect(url_for('login'))
-################################################################################################################
 
 def login_required(f):
     @wraps(f)
@@ -309,29 +306,31 @@ def update_profile_picture():
 def register():
     if 'user_id' in session:
         flash("You are already logged in!", "info")
-        return redirect(url_for('home'))  # Redirect to home if logged in
+        return redirect(url_for('home'))
 
     if request.method == 'POST':
         username = request.form['username']
         password = request.form['password']
+        pet_name = request.form.get('pet_name', None)  # Optional
+        pet_breed = request.form.get('pet_breed', None)  # Optional
         hashed_password = hash_password(password)
-        
-        # Save user to database (placeholder logic)
+
         try:
             db_connection = sqlite3.connect('data/database.db')
             cursor = db_connection.cursor()
             cursor.execute(
-                'INSERT INTO Users (username, password) VALUES (?, ?)',
-                (username, hashed_password)
+                'INSERT INTO Users (username, password, pet_name, pet_breed) VALUES (?, ?, ?, ?)',
+                (username, hashed_password, pet_name, pet_breed)
             )
             db_connection.commit()
             db_connection.close()
-            return redirect(url_for('login'))  # Redirect to login page
-        except Exception as e:
+            flash("Registration successful!", "success")
+            return redirect(url_for('login'))
+        except sqlite3.Error as e:
             print(f"Error during registration: {e}")
-            flash("An error occurred. Please try again.")
+            flash("An error occurred. Please try again.", "danger")
             return render_template('register.html')
-    
+
     return render_template('register.html')
 
 @app.route('/home', methods=['GET', 'POST'])
@@ -395,7 +394,7 @@ def search():
 
         # Search for pets based on pet_name and pet_breed
         cursor.execute('''
-            SELECT user_id, pet_name, pet_breed, profile_picture
+            SELECT Users.user_id, Users.username, Users.pet_name, Users.pet_breed, Users.profile_picture
             FROM Users
             WHERE pet_name LIKE ? OR pet_breed LIKE ?
         ''', (f'%{query}%', f'%{query}%'))
@@ -425,9 +424,10 @@ def search():
         formatted_pets = [
             {
                 'user_id': pet[0],
-                'pet_name': pet[1],
-                'pet_breed': pet[2],
-                'profile_picture': pet[3] if pet[3] else 'assets/default-profile-pic.png'
+                'username': pet[1],
+                'pet_name': pet[2],
+                'pet_breed': pet[3],
+                'profile_picture': pet[4] if pet[4] else 'assets/default-profile-pic.png'
             }
             for pet in pets
         ]

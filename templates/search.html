@@ -16,44 +16,59 @@
   </header>
 
   <!-- Results Section -->
-  <section>
+  <section style="max-width: 800px; margin: 20px auto; padding: 10px;">
     {% if users or pets or posts %}
-      <h2>Search Results for "{{ query }}"</h2>
 
       <!-- Users Section -->
       {% if users %}
-        <h3>Users</h3>
-        <ul>
+        <h3 class="section-header" style="text-align: center">Users</h3>
+        <div id="feed">
           {% for user in users %}
-            <li style="display: flex; align-items: center; margin-bottom: 10px;">
+            <div class="post" style="display: flex; align-items: center;">
               <img src="{{ url_for('static', filename=user.profile_picture) }}"
-                   alt="Profile Picture" style="width: 50px; height: 50px; border-radius: 50%; margin-right: 10px;">
-              <a href="{{ url_for('user_profile', user_id=user.user_id) }}">{{ user.username }}</a>
-            </li>
+                  alt="Profile Picture" style="width: 50px; height: 50px; border-radius: 50%; margin-right: 10px;">
+              <div>
+                <h3>
+                  <a href="{{ url_for('user_profile', user_id=user.user_id) }}" class="username-link">{{ user.username }}</a>
+                </h3>
+              </div>
+            </div>
           {% endfor %}
-        </ul>
+        </div>
       {% endif %}
+
 
       <!-- Pets Section -->
       {% if pets %}
-        <h3>Pets</h3>
-        <ul>
+      <h3 style="text-align: center">Pets</h3>
+        <div id="feed">
           {% for pet in pets %}
-            <li style="display: flex; align-items: center; margin-bottom: 10px;">
+            <div class="post" style="display: flex; align-items: center; padding: 10px;">
+              <!-- Profile Picture -->
               <img src="{{ url_for('static', filename=pet.profile_picture) }}"
-                   alt="Pet Profile Picture" style="width: 50px; height: 50px; border-radius: 50%; margin-right: 10px;">
-              <div>
-                <strong>Pet Name:</strong> {{ pet.pet_name }}<br>
-                <strong>Breed:</strong> {{ pet.pet_breed }}
+                  alt="Pet Profile Picture"
+                  style="width: 60px; height: 60px; border-radius: 50%; margin-right: 15px;">
+              
+              <!-- Info: Username, Pet Name, and Breed -->
+              <div style="display: flex; flex-direction: column;">
+                <!-- Username -->
+                <a href="{{ url_for('user_profile', user_id=pet.user_id) }}" 
+                  class="username-link" style="font-weight: bold; margin-bottom: 5px;">
+                  {{ pet.username }}
+                </a>
+                <!-- Pet Name and Breed -->
+                <p style="margin: 0; font-size: 14px;"><strong>Pet Name:</strong> {{ pet.pet_name }}</p>
+                <p style="margin: 0; font-size: 14px;"><strong>Breed:</strong> {{ pet.pet_breed }}</p>
               </div>
-            </li>
+            </div>
           {% endfor %}
-        </ul>
+        </div>
       {% endif %}
+
 
       <!-- Posts Section -->
       {% if posts %}
-        <h3>Posts</h3>
+      <h3 style="text-align: center">Posts</h3>
         <div id="feed">
           {% for post in posts %}
             <div class="post" style="margin-bottom: 20px; padding: 10px; border: 1px solid #ddd; border-radius: 5px;">
@@ -71,7 +86,9 @@
         </div>
       {% endif %}
     {% else %}
-      <p>No results found for "{{ query }}".</p>
+      {% if query and not (users or pets or posts) %}
+        <p>No results found for "{{ query }}".</p>
+      {% endif %}
     {% endif %}
   </section>
 

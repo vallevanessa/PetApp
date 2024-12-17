@@ -146,6 +146,63 @@ def profile():
         flash("An error occurred. Please try again.")
         return redirect(url_for('home'))
 
+@app.route('/update_profile', methods=['POST'])
+def update_profile():
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+    
+    user_id = session['user_id']
+    pet_name = request.form.get('pet_name')
+    pet_breed = request.form.get('pet_breed')
+    
+    conn = sqlite3.connect('data/database.db')
+    cursor = conn.cursor()
+    cursor.execute("""
+        UPDATE Users
+        SET pet_name = ?, pet_breed = ?
+        WHERE user_id = ?
+    """, (pet_name, pet_breed, user_id))
+    conn.commit()
+    conn.close()
+    
+    flash('Profile updated successfully!')
+    return redirect(url_for('profile'))
+
+
+@app.route('/confirm_delete_account')
+def confirm_delete_account():
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+    return render_template('confirm_delete_account.html')
+
+@app.route('/delete_account', methods=['POST'])
+@login_required
+def delete_account():
+    user_id = session['user_id']
+
+    try:
+        db_connection = sqlite3.connect('data/database.db')
+        cursor = db_connection.cursor()
+
+        
+        cursor.execute('DELETE FROM Posts WHERE user_id = ?', (user_id,))
+
+        
+        cursor.execute('DELETE FROM Followers WHERE follower_id = ? OR followed_id = ?', (user_id, user_id))
+
+        
+        cursor.execute('DELETE FROM Users WHERE user_id = ?', (user_id,))
+
+        db_connection.commit()
+        db_connection.close()
+
+        
+        session.clear()
+        return redirect(url_for('login'))
+
+    except sqlite3.Error as e:
+        print(f"Database error during account deletion: {e}")
+        return "An error occurred during account deletion", 500
 
 
 @app.route('/get_followers')
@@ -166,12 +223,12 @@ def get_followers():
 
         db_connection.close()
 
-        # Return the list as JSON
-        return jsonify([{'user_id': follower[0], 'username': follower[1]} for follower in followers])
+        # Wrap results in a dictionary with the "followers" key
+        return jsonify({"followers": [{'user_id': follower[0], 'username': follower[1]} for follower in followers]})
 
     except sqlite3.Error as e:
         print(f"Database error: {e}")
-        return jsonify([])
+        return jsonify({"followers": []})  # Return empty "followers" on error
 
 @app.route('/get_following')
 @login_required
@@ -191,12 +248,12 @@ def get_following():
 
         db_connection.close()
 
-        # Return the list as JSON
-        return jsonify([{'user_id': follow[0], 'username': follow[1]} for follow in following])
+        # Wrap results in a dictionary with the "following" key
+        return jsonify({"following": [{'user_id': follow[0], 'username': follow[1]} for follow in following]})
 
     except sqlite3.Error as e:
         print(f"Database error: {e}")
-        return jsonify([])
+        return jsonify({"following": []})  # Return empty "following" on error
 
 @app.route('/delete_post/<int:post_id>', methods=['POST'])
 @login_required
@@ -240,12 +297,13 @@ def update_profile_picture():
             db_connection.commit()
             db_connection.close()
 
-            flash ("Profile picture updated successfully!")
+            return jsonify({"success": True, "message": "Profile picture updated successfully!"})
+
         except sqlite3.Error as e:
             print(f"Database error: {e}")
-            flash("An error occurred while updating your profile pictre. Please try again.")
-    return redirect(url_for('profile'))
+            return jsonify({"success": False, "message": "An error occurred while updating your profile picture. Please try again."})
 
+    return jsonify({"success": False, "message": "No file uploaded or invalid file type."})
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():

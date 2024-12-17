@@ -276,14 +276,121 @@ def register():
     
     return render_template('register.html')
 
-@app.route('/home')
+@app.route('/home', methods=['GET', 'POST'])
 @login_required
 def home():
+    if request.method == 'POST':
+        # Handle post submission
+        content = request.form.get('content')
+        file = request.files.get('image')
+        user_id = session['user_id']
+        
+        if not content:
+            flash("Content cannot be empty.", "danger")
+            return redirect(url_for('home'))
+
+        # Save the file
+        if file and allowed_file(file.filename):
+            filename = secure_filename(file.filename)
+            file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+            file.save(file_path)
+        else:
+            file_path = None
+
+        # Insert post into the database
+        try:
+            db_connection = sqlite3.connect('data/database.db')
+            cursor = db_connection.cursor()
+            cursor.execute(
+                'INSERT INTO Posts (user_id, content, image_url) VALUES (?, ?, ?)',
+                (user_id, content, file_path)
+            )
+            db_connection.commit()
+            db_connection.close()
+            flash("Post created successfully!", "success")
+        except sqlite3.Error as e:
+            print(f"Error inserting post: {e}")
+            flash("An error occurred. Please try again.", "danger")
+        return redirect(url_for('home'))
+
+    # Render homepage
     return render_template('home.html')
 
-@app.route('/search')
+@app.route('/search', methods=['GET'])
+@login_required
 def search():
-    return render_template('search.html')
+    query = request.args.get('query', '').strip()  # Get the search query
+    if not query:
+        return render_template('search.html', users=[], pets=[], posts=[], query=query)
+
+    try:
+        db_connection = sqlite3.connect('data/database.db')
+        cursor = db_connection.cursor()
+
+        # Search for users based on username
+        cursor.execute('''
+            SELECT user_id, username, profile_picture
+            FROM Users
+            WHERE username LIKE ?
+        ''', (f'%{query}%',))
+        users = cursor.fetchall()
+
+        # Search for pets based on pet_name and pet_breed
+        cursor.execute('''
+            SELECT user_id, pet_name, pet_breed, profile_picture
+            FROM Users
+            WHERE pet_name LIKE ? OR pet_breed LIKE ?
+        ''', (f'%{query}%', f'%{query}%'))
+        pets = cursor.fetchall()
+
+        # Search for posts based on content
+        cursor.execute('''
+            SELECT Posts.post_id, Users.user_id, Users.username, Posts.content, Posts.image_url, Posts.created_at
+            FROM Posts
+            JOIN Users ON Posts.user_id = Users.user_id
+            WHERE Posts.content LIKE ?
+            ORDER BY Posts.created_at DESC
+        ''', (f'%{query}%',))
+        posts = cursor.fetchall()
+
+        db_connection.close()
+
+        # Format results for the template
+        formatted_users = [
+            {
+                'user_id': user[0],
+                'username': user[1],
+                'profile_picture': user[2] if user[2] else 'assets/default-profile-pic.png'
+            }
+            for user in users
+        ]
+        formatted_pets = [
+            {
+                'user_id': pet[0],
+                'pet_name': pet[1],
+                'pet_breed': pet[2],
+                'profile_picture': pet[3] if pet[3] else 'assets/default-profile-pic.png'
+            }
+            for pet in pets
+        ]
+        formatted_posts = [
+            {
+                'post_id': post[0],
+                'user_id': post[1],
+                'username': post[2],
+                'content': post[3],
+                'image_url': post[4],
+                'created_at': post[5]
+            }
+            for post in posts
+        ]
+
+        return render_template('search.html', users=formatted_users, pets=formatted_pets, posts=formatted_posts, query=query)
+
+    except sqlite3.Error as e:
+        print(f"Database error: {e}")
+        flash("An error occurred while searching. Please try again.")
+        return render_template('search.html', users=[], pets=[], posts=[], query=query)
 
 @app.route('/map')
 def map_view():
@@ -588,35 +695,6 @@ def follow_stats(user_id):
     except Exception as e:
         print(f"Error in /follow_stats: {e}")
         return jsonify({'error': 'An error occurred'}), 500
-
-
-@app.route('/search', methods=['GET'])
-def search_page():
-    type_of_pet = request.args.get('typeOfPet')
-    results = None
-
-    if type_of_pet:
-        try:
-            db_connection = sqlite3.connect('data/database.db')
-            cursor = db_connection.cursor()
-            
-            # Search query using pet_breed
-            query = """
-                SELECT username, pet_name, pet_breed
-                FROM Users
-                WHERE pet_breed LIKE ?
-            """
-            cursor.execute(query, (f"%{type_of_pet}%",))
-            results = cursor.fetchall()
-            db_connection.close()
-        except sqlite3.Error as e:
-            flash(f"An error occurred: {e}", "danger")
-
-    return render_template('search.html', results=results)
-
-
-
-
 
 if __name__ == '__main__':
     app.run(debug=True)

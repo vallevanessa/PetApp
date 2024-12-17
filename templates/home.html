@@ -12,6 +12,15 @@
     <h1>Home</h1>
 </header>
 
+<!-- Post Creation Section -->
+<div class="post-creation">
+    <form action="{{ url_for('home') }}" method="POST" enctype="multipart/form-data">
+        <textarea name="content" placeholder="What's on your mind?" required></textarea>
+        <input type="file" name="image" accept="image/*">
+        <button type="submit">Post</button>
+    </form>
+</div>
+
 <!-- Feed Section -->
 <div id="feed">
     <p>Loading posts...</p>

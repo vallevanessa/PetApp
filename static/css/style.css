@@ -418,3 +418,43 @@ section {
 #results ul li:last-child {
   border-bottom: none;
 }
+
+/* Post Creation Styling */
+.post-creation {
+  background-color: #fff; /* Same as post background */
+  border: 1px solid #ddd; /* Same border as posts */
+  border-radius: 8px; /* Rounded corners */
+  margin: 20px auto; /* Center and add spacing */
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Same shadow as posts */
+  padding: 15px; /* Adjust padding for content */
+  max-width: 600px; /* Match post width */
+}
+
+.post-creation textarea {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+  resize: none;
+  margin-bottom: 10px;
+}
+
+.post-creation input[type="file"] {
+  display: block;
+  margin-bottom: 10px;
+}
+
+.post-creation button {
+  background-color: #4CAF50; /* Match buttons in posts */
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.post-creation button:hover {
+  background-color: #45a049; /* Darker green on hover */
+}

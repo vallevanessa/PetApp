@@ -3,17 +3,20 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PetApp - Search</title>
+  <title>PetApp - Find More Friends</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  <link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
 </head>
 <body>
-  <header>
-    <h1>Search</h1>
-    <form method="GET" action="{{ url_for('search') }}">
-      <input type="text" name="query" value="{{ query }}" placeholder="Search for users, pets, or posts..." required>
-      <button type="submit">Search</button>
-    </form>
-  </header>
+  <div id="search-page">
+    <header>
+      <h1>Find More Friends</h1>
+      <form method="GET" action="{{ url_for('search') }}">
+        <input type="text" name="query" value="{{ query }}" placeholder="Search for users, pets, or posts..." required>
+        <button type="submit">Search</button>
+      </form>
+    </header>
+
 
   <!-- Results Section -->
   <section style="max-width: 800px; margin: 20px auto; padding: 10px;">
@@ -96,19 +99,19 @@
   <nav class="bottom-nav">
     <a href="{{ url_for('home') }}" class="nav-item">
       <img src="{{ url_for('static', filename='assets/home-icon.png') }}" alt="Home" />
-      <span>Home</span>
+      <span></span>
     </a>
     <a href="{{ url_for('search') }}" class="nav-item">
       <img src="{{ url_for('static', filename='assets/search-icon.png') }}" alt="Search" />
-      <span>Search</span>
+      <span></span>
     </a>
     <a href="{{ url_for('map_view') }}" class="nav-item">
       <img src="{{ url_for('static', filename='assets/map-icon.png') }}" alt="Map" />
-      <span>Map</span>
+      <span></span>
     </a>
     <a href="{{ url_for('profile') }}" class="nav-item">
       <img src="{{ url_for('static', filename='assets/profile-icon.png') }}" alt="Profile" />
-      <span>Profile</span>
+      <span></span>
     </a>
   </nav>
 </body>

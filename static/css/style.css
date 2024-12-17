@@ -83,7 +83,7 @@ section {
 
 /* Style for clickable usernames */
 .username-link {
-  color: #007BFF; /* Blue color to indicate links */
+  color: #585f66; /* Blue color to indicate links */
   text-decoration: none; /* Remove underline */
   font-weight: bold; /* Make the text bold */
 }
@@ -207,73 +207,35 @@ section {
   display: flex;
   justify-content: space-around;
   align-items: center;
-  background-color: #fff;
-  border-top: 1px solid #ddd;
-  box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1);
+  background-color: #65c968;
   padding: 0.5rem 0;
+  box-shadow: 0 -1px 8px rgba(0, 0, 0, 0.3);
 }
 
 .bottom-nav .nav-item {
-  text-align: center;
-  text-decoration: none;
-  color: #555;
-  font-size: 0.8rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 15%; /* Ensure each button has equal width */
+  padding: 10px;
+  border-radius: 5px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
 }
 
 .bottom-nav img {
-  width: 24px;
-  height: 24px;
-  margin-bottom: 0.2rem;
+  width: 30px; /* Adjust size as needed */
+  height: 30px;
+  opacity: 0.9;
+  filter: invert(100%); 
 }
 
-.bottom-nav .nav-item:hover {
-  color: #4CAF50;
+.bottom-nav .nav-item:hover, .bottom-nav .nav-item:active {
+  background-color: #367c39;
+  transform: translateY(-2px);
 }
 
 .bottom-nav .nav-item:active {
-  color: #388E3C;
-}
-
-/* Filter Buttons Styling */
-#filter-buttons {
-  position: absolute;
-  top: 20px;
-  left: 50%;
-  transform: translateX(-50%);
-  display: flex;
-  gap: 15px;
-  z-index: 1000;
-}
-
-.filter-button {
-  background-color: #007BFF;
-  color: white;
-  font-size: 16px;
-  padding: 10px 20px;
-  border-radius: 5px;
-  border: none;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
-}
-
-.filter-button:hover {
-  background-color: #0056b3;
-}
-
-.filter-button:focus {
-  outline: 2px solid #007BFF; /* Focus state for accessibility */
-  outline-offset: 2px;
-}
-
-/* Profile Page Styling */
-.profile-container {
-  max-width: 800px;
-  margin: 20px auto;
-  padding: 20px;
-  background-color: #fff;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  transform: translateY(1px);
 }
 
 .user-details {
@@ -305,41 +267,54 @@ section {
 }
 
 /* Styles for the Search Page */
+body {
+  margin: 0;
+  padding: 0;
+  background: linear-gradient(135deg, #deffd7, #deffd7); /* Green gradient background */
+  font-family: Arial, sans-serif; /* Assuming Arial as the default font */
+  height: 100vh; /* Optional: Ensures the gradient covers the full view height */
+}
 #search-page {
   padding: 20px;
-  background-color: #fff;
   max-width: 800px;
   margin: 20px auto;
   border-radius: 8px;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-  border: 1px solid #ddd;
 }
 
 #search-page h1 {
-  font-size: 24px;
-  color: #333;
+  font-size: 28px; /* Adjusted size for better visibility */
+  color: white; /* White color for better contrast on gradient */
   margin-bottom: 20px;
+  font-family: 'Pacifico', cursive; /* Applies the Pacifico cursive font */
   text-align: center;
 }
 
-#search-page .form-group {
-  margin-bottom: 15px;
+#search-page form {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
 }
 
-#search-page .form-group label {
-  display: block;
-  font-weight: bold;
-  margin-bottom: 8px;
-  color: #333;
-}
-
-#search-page .form-group select {
-  width: 100%;
+#search-page input[type="text"] {
+  flex-grow: 1;
   padding: 10px;
-  font-size: 16px;
-  border: 1px solid #ccc;
   border-radius: 5px;
-  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+  border: 2px solid #8DC26F; /* Light green border to match the gradient */
+  font-size: 16px;
+}
+
+#search-page button {
+  padding: 10px 20px;
+  background-color: #4CAF50; /* Consistent with other buttons */
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+#search-page button:hover {
+  background-color: #367c39; /* Darker green on hover */
 }
 
 #search-page .btn-primary {
@@ -363,29 +338,6 @@ section {
 
 #search-page .btn-primary:active {
   background-color: #3e8e41;
-}
-
-/* Bottom Navigation Bar Specific to Search Page */
-#search-page nav.bottom-nav {
-  margin-top: 30px;
-  background-color: #f8f8f8;
-  border-top: 1px solid #ddd;
-}
-
-#search-page nav.bottom-nav .nav-item {
-  text-align: center;
-  text-decoration: none;
-  color: #555;
-}
-
-#search-page nav.bottom-nav img {
-  width: 24px;
-  height: 24px;
-  margin-bottom: 4px;
-}
-
-#search-page nav.bottom-nav .nav-item:hover {
-  color: #4CAF50;
 }
 
 #results {
@@ -419,42 +371,159 @@ section {
   border-bottom: none;
 }
 
+
 /* Post Creation Styling */
 .post-creation {
-  background-color: #fff; /* Same as post background */
-  border: 1px solid #ddd; /* Same border as posts */
-  border-radius: 8px; /* Rounded corners */
-  margin: 20px auto; /* Center and add spacing */
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Same shadow as posts */
-  padding: 15px; /* Adjust padding for content */
-  max-width: 600px; /* Match post width */
+  background-color: #c1f3bb; /* Light green background similar to post background */
+  border: 1px solid #c1f3bb; /* Same color border to blend with the background */
+  border-radius: 8px; /* Rounded corners for a softer look */
+  margin: 20px auto; /* Center the container horizontally and add vertical spacing */
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
+  padding: 15px; /* Inner padding for content spacing */
+  max-width: 600px; /* Restrict maximum width to enhance readability */
 }
 
 .post-creation textarea {
-  width: 100%;
-  padding: 10px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  font-size: 14px;
-  resize: none;
-  margin-bottom: 10px;
+  width: 100%; /* Full width to use available space */
+  padding: 10px; /* Comfortable padding around text */
+  border: 1px solid #c1f3bb; /* Light green border to blend in */
+  border-radius: 4px; /* Slightly rounded corners */
+  font-size: 14px; /* Readable font size */
+  resize: none; /* Disable resizing to maintain consistent layout */
+  margin-bottom: 10px; /* Space below the textarea */
 }
 
 .post-creation input[type="file"] {
-  display: block;
-  margin-bottom: 10px;
+  display: block; /* Block display to start on new line */
+  margin: 10px auto; /* Top and bottom margin for spacing, auto for horizontal centering */
+  width: fit-content; /* Width to fit the content's size */
 }
 
 .post-creation button {
-  background-color: #4CAF50; /* Match buttons in posts */
-  color: white;
-  padding: 10px 20px;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  transition: background-color 0.3s;
+  display: block; /* Block display to start on new line */
+  margin: 10px auto; /* Top and bottom margin for spacing, auto for horizontal centering */
+  background-color: #4CAF50; /* Green background */
+  color: white; /* Text color for contrast */
+  padding: 10px 20px; /* Padding for a better touch area */
+  border: none; /* No border for a cleaner look */
+  border-radius: 5px; /* Rounded corners for a friendly appearance */
+  cursor: pointer; /* Cursor indicates clickable area */
+  transition: background-color 0.3s; /* Smooth transition for hover effect */
+  width: fit-content; /* Adjust width to fit content */
 }
 
 .post-creation button:hover {
-  background-color: #45a049; /* Darker green on hover */
+  background-color: #45a049; /* Darker green on hover for visual feedback */
 }
+
+
+/* Custom Login Page Styles - Enhanced Specificity */
+body .login-container {
+  background-color: rgba(255, 255, 255, 0.9); /* Slightly transparent white */
+  padding: 2.5rem;
+  border-radius: 15px;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+  width: 340px;
+  text-align: center;
+}
+
+body .login-container h2 {
+  margin-bottom: 1.5rem;
+  color: #333;
+  font-size: 24px; /* Larger font size for heading */
+}
+
+body .login-container input[type="text"],
+body .login-container input[type="password"] {
+  width: calc(100% - 2rem);
+  padding: 10px;
+  margin-bottom: 15px;
+  border: 2px solid #ddd;
+  border-radius: 8px;
+  font-size: 16px; /* Larger font size for better readability */
+}
+
+body .login-container button {
+  background-color: #007bff;
+  color: #ffffff;
+  border: none;
+  padding: 10px 0;
+  margin-top: 20px;
+  cursor: pointer;
+  width: 100%;
+  border-radius: 8px;
+  font-size: 16px; /* Larger button text */
+  transition: background-color 0.3s ease; /* Smooth transition for hover effect */
+}
+
+body .login-container button:hover {
+  background-color: #0056b3;
+}
+
+body .link {
+  margin-top: 20px;
+  font-size: 14px; /* Slightly larger for better readability */
+}
+
+body .link a {
+  color: #007bff;
+  text-decoration: none;
+}
+
+body .flash-messages {
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+body .flash-success,
+body .flash-danger {
+  padding: 10px;
+  border-radius: 5px;
+  margin-bottom: 1rem;
+  font-size: 14px; /* Standardize font size for messages */
+}
+
+body .flash-success {
+  background-color: #d4edda;
+  color: #155724;
+  border: 1px solid #c3e6cb;
+}
+
+body .flash-danger {
+  background-color: #f8d7da;
+  color: #721c24;
+  border: 1px solid #f5c6cb;
+}
+
+
+/* Filter Buttons Styling */
+#filter-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 10px;  /* Adjust gap to space out buttons evenly */
+  padding: 10px 0;
+  background-color: #65c968;  /* Consistent with bottom nav background */
+}
+
+.filter-button {
+  padding: 10px 20px;
+  background-color: #4CAF50; /* Same as bottom-nav buttons */
+  color: white;
+  border: none;
+  border-radius: 5px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.3s, transform 0.2s; /* Smooth color and position transitions */
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2); /* Similar shadow for depth */
+}
+
+.filter-button:hover {
+  background-color: #367c39; /* Darker shade on hover */
+  transform: translateY(-2px); /* Slight raise effect */
+}
+
+.filter-button:active {
+  background-color: #2e5c2d; /* Even darker for active state */
+  transform: translateY(1px); /* Slight depression effect */
+}
+

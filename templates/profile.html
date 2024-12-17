@@ -165,8 +165,7 @@
   .then(response => response.json()) // Expecting JSON response
   .then(data => {
     if (data.success) {
-      // alert(data.message); // Success message from server
-      // continue
+      document.getElementById("save-btn").style.display = 'none'; // Hide the save button after successful save
     } else {
       alert(data.message); // Error message from server
     }

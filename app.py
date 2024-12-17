@@ -53,7 +53,7 @@ def login():
         hashed_password = hash_password(password)
         
         try:
-            db_connection = sqlite3.connect('data/database.db')  # Ensure this path is correct
+            db_connection = sqlite3.connect('data/database.db')
             cursor = db_connection.cursor()
 
             cursor.execute(

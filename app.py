@@ -590,6 +590,33 @@ def follow_stats(user_id):
         return jsonify({'error': 'An error occurred'}), 500
 
 
+@app.route('/search', methods=['GET'])
+def search_page():
+    type_of_pet = request.args.get('typeOfPet')
+    results = None
+
+    if type_of_pet:
+        try:
+            db_connection = sqlite3.connect('data/database.db')
+            cursor = db_connection.cursor()
+            
+            # Search query using pet_breed
+            query = """
+                SELECT username, pet_name, pet_breed
+                FROM Users
+                WHERE pet_breed LIKE ?
+            """
+            cursor.execute(query, (f"%{type_of_pet}%",))
+            results = cursor.fetchall()
+            db_connection.close()
+        except sqlite3.Error as e:
+            flash(f"An error occurred: {e}", "danger")
+
+    return render_template('search.html', results=results)
+
+
+
+
 
 if __name__ == '__main__':
     app.run(debug=True)

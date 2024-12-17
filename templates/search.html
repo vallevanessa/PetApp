@@ -7,27 +7,62 @@
   <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 <body>
+  <div id="search-page">
+    <h1>Search for Pet Owners</h1>
+    
+    <!-- Search Form -->
+    <form action="{{ url_for('search_page') }}" method="GET">
+      <div class="form-group">
+        <label for="typeOfPet">Type of Pet:</label>
+        <select id="typeOfPet" name="typeOfPet" class="form-control">
+          <option value="">Select a pet type</option>
+          <option value="dog" {% if request.args.get('typeOfPet') == 'dog' %}selected{% endif %}>Dog</option>
+          <option value="cat" {% if request.args.get('typeOfPet') == 'cat' %}selected{% endif %}>Cat</option>
+          <option value="bird" {% if request.args.get('typeOfPet') == 'bird' %}selected{% endif %}>Bird</option>
+          <option value="reptile" {% if request.args.get('typeOfPet') == 'reptile' %}selected{% endif %}>Reptile</option>
+          <option value="other" {% if request.args.get('typeOfPet') == 'other' %}selected{% endif %}>Other</option>
+        </select>
+      </div>
+      <button type="submit" class="btn btn-primary">Search</button>
+    </form>
+    
+    <!-- Results Section -->
+    <div id="results">
+      {% if results is not none %}
+        <h2>Search Results</h2>
+        {% if results %}
+          <ul>
+            {% for user in results %}
+              <li>
+                <strong>{{ user[0] }}</strong> owns a pet named <strong>{{ user[1] }}</strong> ({{ user[2] }}).
+              </li>
+            {% endfor %}
+          </ul>
+        {% else %}
+          <p>No users found with the selected type of pet.</p>
+        {% endif %}
+      {% endif %}
+    </div>
+  </div>
 
-
-    <p>search</p>
-    <nav class="bottom-nav">
-        <a href="{{ url_for('home') }}" class="nav-item">
-            <img src="{{ url_for('static', filename='assets/home-icon.png') }}" alt="Home" />
-            <span>Home</span>
-        </a>
-        <a href="{{ url_for('search') }}" class="nav-item">
-            <img src="{{ url_for('static', filename='assets/search-icon.png') }}" alt="Search" />
-            <span>Search</span>
-        </a>
-        <a href="{{ url_for('map_view') }}" class="nav-item">
-            <img src="{{ url_for('static', filename='assets/map-icon.png') }}" alt="Map" />
-            <span>Map</span>
-        </a>
-        <a href="{{ url_for('profile') }}" class="nav-item">
-            <img src="{{ url_for('static', filename='assets/profile-icon.png') }}" alt="Profile" />
-            <span>Profile</span>
-        </a>
-    </nav>
+  <!-- Bottom Navigation Bar -->
+  <nav class="bottom-nav">
+    <a href="{{ url_for('home') }}" class="nav-item">
+      <img src="{{ url_for('static', filename='assets/home-icon.png') }}" alt="Home" />
+      <span>Home</span>
+    </a>
+    <a href="{{ url_for('search_page') }}" class="nav-item">
+      <img src="{{ url_for('static', filename='assets/search-icon.png') }}" alt="Search" />
+      <span>Search</span>
+    </a>
+    <a href="{{ url_for('map_view') }}" class="nav-item">
+      <img src="{{ url_for('static', filename='assets/map-icon.png') }}" alt="Map" />
+      <span>Map</span>
+    </a>
+    <a href="{{ url_for('profile') }}" class="nav-item">
+      <img src="{{ url_for('static', filename='assets/profile-icon.png') }}" alt="Profile" />
+      <span>Profile</span>
+    </a>
+  </nav>
 </body>
-
 </html>

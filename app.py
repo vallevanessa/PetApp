@@ -494,29 +494,48 @@ def create_post():
     return jsonify({'error': 'Invalid file type'}), 400
 
 @app.route('/fetch_posts', methods=['GET'])
+@login_required
 def fetch_posts():
     try:
         user_id = session['user_id']  # Current logged-in user
         db_connection = sqlite3.connect('data/database.db')
         cursor = db_connection.cursor()
 
-        # Fetch posts with user details and like status
+        # Fetch posts from users the logged-in user follows
         cursor.execute('''
             SELECT Posts.post_id, Users.user_id, Users.username, Posts.content, Posts.image_url, Posts.created_at,
                    (SELECT COUNT(*) FROM Likes WHERE Likes.post_id = Posts.post_id) AS like_count,
                    EXISTS (SELECT 1 FROM Likes WHERE Likes.post_id = Posts.post_id AND Likes.user_id = ?) AS user_liked
             FROM Posts
             JOIN Users ON Posts.user_id = Users.user_id
+            WHERE Posts.user_id IN (
+                SELECT followed_id FROM Followers WHERE follower_id = ?
+            )
             ORDER BY Posts.created_at DESC
-        ''', (user_id,))
-        posts = cursor.fetchall()
+        ''', (user_id, user_id))
+        follower_posts = cursor.fetchall()
+
+        # Fetch posts from other users (recommended)
+        cursor.execute('''
+            SELECT Posts.post_id, Users.user_id, Users.username, Posts.content, Posts.image_url, Posts.created_at,
+                   (SELECT COUNT(*) FROM Likes WHERE Likes.post_id = Posts.post_id) AS like_count,
+                   EXISTS (SELECT 1 FROM Likes WHERE Likes.post_id = Posts.post_id AND Likes.user_id = ?) AS user_liked
+            FROM Posts
+            JOIN Users ON Posts.user_id = Users.user_id
+            WHERE Posts.user_id NOT IN (
+                SELECT followed_id FROM Followers WHERE follower_id = ?
+            )
+            ORDER BY Posts.created_at DESC
+        ''', (user_id, user_id))
+        recommended_posts = cursor.fetchall()
+
         db_connection.close()
 
-        # Structure posts with user_id for linking profiles
-        posts_list = [
-            {
+        # Structure posts separately for clarity
+        def format_post(post):
+            return {
                 'post_id': post[0],
-                'user_id': post[1],  # Added for linking profile
+                'user_id': post[1],
                 'username': post[2],
                 'content': post[3],
                 'image_url': post[4],
@@ -524,14 +543,16 @@ def fetch_posts():
                 'like_count': post[6],
                 'user_liked': bool(post[7])
             }
-            for post in posts
-        ]
 
-        return jsonify(posts_list)
+        return jsonify({
+            'follower_posts': [format_post(post) for post in follower_posts],
+            'recommended_posts': [format_post(post) for post in recommended_posts]
+        })
 
     except Exception as e:
         print(f"Error in /fetch_posts: {e}")
         return jsonify({'error': str(e)}), 500
+
 
 
 @app.route('/add_comment', methods=['POST'])
